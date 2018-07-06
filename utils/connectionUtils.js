@@ -2,12 +2,13 @@
 const mongoose = require('mongoose');
 
 // Open a connection to a specific database
-module.exports.openConnection = (dbName, mongoUri='mongodb://localhost:27017/') => {
-  let conn = mongoose.createConnection(mongoUri+dbName);
+module.exports.openConnection = (mongoUri=null) => {
+  let uri = process.env.MONGODB_URI || mongoUri;
+  let conn = mongoose.createConnection(uri, { useNewUrlParser: true });
   conn.on('error', (err) => console.log(err.message));
-  conn.once('connected', () => console.log('Mongo connected: ', mongoUri+dbName));
-  conn.once('disconnected', () => console.log('Mongo disconnected: ', mongoUri+dbName));
-  conn.once('open', ()=> console.log('Connection open: ', mongoUri+dbName));
+  conn.once('connected', () => console.log('Mongo connected: ', uri));
+  conn.once('disconnected', () => console.log('Mongo disconnected: ', uri));
+  conn.once('open', ()=> console.log('Connection open: ', uri));
   return conn;
 }
 
