@@ -53,4 +53,14 @@ module.exports.admin = (
   return genMiddlewareFunc(sessionKey, adminFlag, redirect, exceptions);
 }
 
-//
+// A helper function to hash a string
+module.exports.hash = (str, raw=false) => {
+  let toHash = (raw ? str : (str+'').trim());
+  return bcrypt.hashSync(toHash, bcrypt.genSaltSync(10));
+}
+
+// A helper function to check a string against a hash
+module.exports.matchesHash = (str, hash, raw=false) => {
+  let toMatch = (raw ? str : (str+'').trim());
+  return bcrypt.compareSync(toMatch, hash);
+}

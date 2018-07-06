@@ -22,7 +22,7 @@ app.use(session({
   saveUninitialized: false,
   secret: connUtils.genHash(),
   store: new MemoryStore({
-    // Prune expired 24h (1000ms x 60s x 60m x 24h = 86400000)
+    // Remove expired every 24 hours (1000ms x 60s x 60m x 24h = 86400000)
     checkPeriod: 86400000
   })
 }));
@@ -45,6 +45,9 @@ app.use('/', publicRoutes);
 app.get('*', (req, res)=>{
   res.status(404).send("Here Be Dragons");
 })
+
+// Use a global DB connection
+connUtils.connect('mongodb://localhost:27017/alone_together');
 
 // Start the server
 app.listen(port, ()=>{
