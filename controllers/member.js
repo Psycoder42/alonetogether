@@ -24,6 +24,7 @@ router.get('/', (req, res)=>{
 // Member sign up form (New route)
 router.get('/new', (req, res)=>{
   res.render('public/login.ejs', {
+    user: req.session.curUser,
     isNew: true,
     error: null
   });
@@ -36,6 +37,7 @@ router.post('/create', (req, res)=>{
   let nameError = validation.validateUsername(name);
   if (nameError) {
     res.render('public/login.ejs', {
+      user: req.session.curUser,
       isNew: true,
       error: nameError
     });
@@ -46,6 +48,7 @@ router.post('/create', (req, res)=>{
   let passError = validation.validatePassword(pass);
   if (passError) {
     res.render('public/login.ejs', {
+      user: req.session.curUser,
       isNew: true,
       error: passError
     });
@@ -63,6 +66,7 @@ router.post('/create', (req, res)=>{
         console.log(err.message);
       }
       res.render('public/login.ejs', {
+        user: req.session.curUser,
         isNew: true,
         error: message
       });
@@ -80,16 +84,36 @@ router.put('/:username', (req, res)=>{
 
 // Specific member page (Destroy route)
 router.delete('/:username', (req, res)=>{
-  res.send('Deleting member');
+  let name = pageUtils.cleanString(req.params.username);
+  if (req.session.curUser.username != name) {
+    // User is trying to delete someone else
+    console.log(req.session.curUser.username, 'tried to delete', name);
+    res.redirect('back');
+  } else {
+    // User is deleting their account
+    Member.findByIdAndRemove(req.session.curUser._id, (err, data)=>{
+      if (err) {
+        // Log for debuggin purposes
+        console.log(err.message);
+        res.redirect(req.baseUrl+'/'+name);
+      } else {
+        // Log the now deleted user out and redirect to main landing page
+        req.session.curUser = null;
+        res.redirect('/');
+      }
+    });
+  }
 });
 
 // Specific member page (Show route)
 router.get('/:username', (req, res)=>{
-  res.send('Member page');
+  res.render('member/show.ejs', {
+    user: req.session.curUser
+  });
 });
 
-// Modify member settings (Edit route)
-router.get('/:username/settings', (req, res)=>{
+// Modify member (Edit route)
+router.get('/:username/account', (req, res)=>{
   res.send('Member settings');
 });
 

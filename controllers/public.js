@@ -5,14 +5,14 @@ const router = express.Router();
 // The main landing page (Index route)
 router.get('/', (req, res)=>{
   res.render('public/index.ejs', {
-    user: req.session.authUser
+    user: req.session.curUser
   });
 });
 
 // Information about the website
 router.get('/about', (req, res)=>{
   res.render('public/about.ejs', {
-    user: req.session.authUser
+    user: req.session.curUser
   });
 });
 

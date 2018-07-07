@@ -20,12 +20,14 @@ router.post('/', (req, res)=>{
       // Log error for debugging purposes
       console.log(err.message);
       res.render('public/login.ejs', {
+        user: req.session.curUser,
         isNew: false,
         error: "Log in was unsuccessful. Please try again later."
       });
     } else if (!security.matchesHash(pass, data.password)) {
       // Bad password
       res.render('public/login.ejs', {
+        user: req.session.curUser,
         isNew: false,
         error: "Incorrect username/password combination."
       });
@@ -48,6 +50,7 @@ router.delete('/', (req, res)=>{
 // Display the log in form (New route)
 router.get('/', (req, res)=>{
   res.render('public/login.ejs', {
+    user: req.session.curUser,
     isNew: false,
     error: null
   });
