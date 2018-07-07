@@ -10,6 +10,8 @@ const genMiddlewareFunc = (
     redirect='/',
     exceptions=[]) => {
   return (req, res, next) => {
+    req.session.redirectedFrom = null;
+    let finalDest = req.baseUrl+req.path;
     // Check if the path is one of the exceptions
     let destination = req.path.trim().toLowerCase();
     for (let ePath of exceptions) {
@@ -24,15 +26,18 @@ const genMiddlewareFunc = (
     if (req.session[sessionKey]) {
       let hasAccess = (adminFlag==null || req.session[sessionKey][adminFlag]);
       if (hasAccess) {
+        // The user has the appropriate access
         next();
+        // Make sure this middleware stops processing
+        return;
       } else {
-        console.log(`Non-admin attempt to access: ${req.baseUrl}${req.path}`);
-        res.redirect(redirect);
+        console.log(`Non-admin attempt to access: ${finalDest}`);
       }
     } else {
-      console.log(`Unauthenticated attempt to access: ${req.baseUrl}${req.path}`);
-      res.redirect(redirect);
+      console.log(`Unauthenticated attempt to access: ${finalDest}`);
     }
+    req.session.redirectedFrom = finalDest;
+    res.redirect(redirect);
   };
 }
 

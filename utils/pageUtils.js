@@ -12,6 +12,11 @@ module.exports.genRenderCallback = (response, callback, customData=null) => {
   };
 }
 
+// Return a boolean based on whether a checkbox was checked (value of 'on')
+module.exports.isChecked = (value) => {
+  return (value == 'on');
+}
+
 // Return a trimmed string. If the string is empty and a default was
 // passed, return the default instead
 module.exports.cleanString = (str, fallback=null) => {

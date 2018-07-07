@@ -1,5 +1,6 @@
 // Module dependencies
 // Common modules: ejs express mongoose method-override
+const ejs = require('ejs');
 const express = require('express');
 const session = require('express-session');
 const methodOverride = require('method-override');

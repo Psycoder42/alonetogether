@@ -24,7 +24,7 @@ router.post('/', (req, res)=>{
         isNew: false,
         error: "Log in was unsuccessful. Please try again later."
       });
-    } else if (!security.matchesHash(pass, data.password)) {
+    } else if (!data || !security.matchesHash(pass, data.password)) {
       // Bad password
       res.render('public/login.ejs', {
         user: req.session.curUser,
@@ -32,9 +32,11 @@ router.post('/', (req, res)=>{
         error: "Incorrect username/password combination."
       });
     } else {
-      // log them in and send them to their page
+      // Destination is either where they tried to get to or their own page
+      let dest = req.session.redirectedFrom || '/members/'+name;
+      // log them in and send them to their destination
       req.session.curUser = data;
-      res.redirect('/members/'+name);
+      res.redirect(dest);
     }
   });
 });

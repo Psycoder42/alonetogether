@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<%
+  let subtitle = ' - Member - ' + member.username;
+%>
+  <head>
+  <%- include('../partials/header.ejs', { subtitle: subtitle }); %>
+  </head>
+  <body>
+    <h1><%= member.username %></h1>
+    <img src="/images/anon.svg" alt="<%= member.username %>">
+    <p>This member currently prefers to be alone.</p>
+    <form class="friend-request" action="/members/<%= member.username %>/befriend" method="post">
+      <textarea name="message">Hello, would you like to be friends?</textarea>
+      <input type="submit" value="Send Friend Request">
+    </form>
+  <% include ../partials/footer.ejs %>
+  </body>
+</html>

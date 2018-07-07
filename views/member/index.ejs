@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<%
+  let subtitle = ' - Members';
+%>
+  <head>
+  <%- include('../partials/header.ejs', { subtitle: subtitle }); %>
+  </head>
+  <body>
+    <h1>Members</h1>
+    <% for (let member of allMembers) { %>
+    <a href="/members/<%= member.username %>">
+      <div class="member">
+        <%
+          let visible = canSee(member, user);
+          let imgSrc = (visible ? member.profilePic : '/images/anon.svg');
+          let status = (member.friendsOnly ? 'alone' : 'together');
+        %>
+        <img src="<%= imgSrc %>" alt="<%= member.username %>">
+        <div class="member-summary">
+          <h3><%= member.username %></h3>
+          <p>Currently wants to be <%= status %>.</p>
+        </div>
+      </div>
+    </a>
+    <% } %>
+  <% include ../partials/footer.ejs %>
+  </body>
+</html>

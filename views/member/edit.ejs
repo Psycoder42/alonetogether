@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <%
-  let subtitle = ' - Member - ' + member.username;
+  let subtitle = ' - Member - ' + member.username + ' - Settings';
   let imgSrc = (member.username ? member.username : '/images/anon.svg');
 %>
   <head>
   <%- include('../partials/header.ejs', { subtitle: subtitle }); %>
   </head>
   <body>
-    <h1><%= member.username %></h1>
+    <h1>Settings</h1>
     <img src="<%= member.profilePic %>" alt="<%= member.username %>">
-    <% if (user._id == member._id) { %>
-    <a href="/members/<%= member.username %>/account">Account Settings</a>
-    <% } %>
+    <form action="/members/<%= imgSrc %>?_method=delete" method="post">
+      <input type="submit" value="Delete My Account">
+    </form>
   <% include ../partials/footer.ejs %>
   </body>
 </html>
