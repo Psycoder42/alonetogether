@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<%
+  let subtitle = (isNew ? 'Sign Up' : 'Log In');
+  let formAction = (isNew ? '/members/create' : '/login');
+%>
+  <head>
+  <%- include('../partials/header.ejs', { subtitle: 'Log In' }); %>
+  </head>
+  <body>
+    <form class="auth-form" action="<%= formAction %>" method="post">
+      <% if (error) { %>
+      <div class="error-message"><%= error %></div>
+      <% } %>
+      <label for="username">USERNAME
+        <% if (isNew) { %>
+        <span class="hint">Allowed Characters: a-zA-Z0-9._-</span>
+        <% } %>
+      </label>
+      <input type="text" name="username">
+      <label for="password">PASSWORD
+        <% if (isNew) { %>
+        <span class="hint">Must be at least 8 characters long (whitespace is trimmed)</span>
+        <% } else { %>
+        <span class="hint">Passwords are case sensative</span>
+        <% } %>
+      </label>
+      <input type="password" name="password">
+      <input type="submit" value="<%= subtitle %>">
+    </form>
+  <% include ../partials/footer.ejs %>
+  </body>
+</html>

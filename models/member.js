@@ -1,9 +1,6 @@
 // Module dependencies
 const mongoose = require('mongoose');
 
-// Custom modules
-const pageUtils = require('../utils/pageUtils.js');
-
 // Schema definition
 const memberSchema = mongoose.Schema({
   username: {type: String, required: true, unique: true},
