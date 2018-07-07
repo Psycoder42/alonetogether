@@ -1,0 +1,17 @@
+html {
+  background-color: steelblue;
+}
+
+.member {
+  display: inline-flex;
+}
+
+.member img {
+  width: 100px;
+  height: 100px;
+}
+
+.avatar {
+  width: 250px;
+  height: 250px;
+}

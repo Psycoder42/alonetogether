@@ -9,7 +9,7 @@
   </head>
   <body>
     <h1>Settings</h1>
-    <img src="<%= member.profilePic %>" alt="<%= member.username %>">
+    <img class="avatar" src="<%= member.profilePic %>" alt="<%= member.username %>">
     <form action="/members/<%= imgSrc %>?_method=delete" method="post">
       <input type="submit" value="Delete My Account">
     </form>

@@ -8,7 +8,7 @@
   </head>
   <body>
     <h1><%= member.username %></h1>
-    <img src="/images/anon.svg" alt="<%= member.username %>">
+    <img class="avatar" src="/images/anon.svg" alt="<%= member.username %>">
     <p>This member currently prefers to be alone.</p>
     <form class="friend-request" action="/members/<%= member.username %>/befriend" method="post">
       <textarea name="message">Hello, would you like to be friends?</textarea>
