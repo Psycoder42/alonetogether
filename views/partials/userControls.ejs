@@ -1,9 +1,9 @@
-<div class="user-controls">
+<div class="flex-row">
 <% if (user) { %>
-  <a class="txt-link row" href="/members/<%= user.username %>">
-    <%= user.username %>
-  </a>
-  <a class="txt-link row" href="/members/<%= user.username %>/account">Settings</a>
+  <a class="txt-link" href="/members/<%= user.username %>">Profile</a>
+  <p class="spacer">|</p>
+  <a class="txt-link" href="/members/<%= user.username %>/account">Settings</a>
+  <p class="spacer">|</p>
   <form action="/login" method="post">
     <input type="hidden" name="_method" value="delete">
     <input class="txt-button" type="submit" value="Log Out">

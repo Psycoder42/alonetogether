@@ -1,9 +1,7 @@
-<header>
+<header class="flex-row full">
 <% let homeLoc = (user ? '/members' : '/'); %>
-  <div class="start fill">
+  <div class="fill">
     <h1><a class="txt-link" href="<%= homeLoc %>">AloneTogether</a></h1>
   </div>
-  <div class="end">
-    <%- include('userControls.ejs', { user: user }); %>
-  </div>
+<%- include('userControls.ejs', { user: user }); %>
 </header>

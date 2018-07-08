@@ -1,43 +1,56 @@
 :root {
+  --text-color: thistle;
   --link-color: yellow;
+  --hint-text-color: lightgrey;
   --accent-text-color: bisque;
   --attention-text-color: orange;
+  --background-color: navy;
+  --separator-color: royalblue;
 }
 
 html {
-  background-color: steelblue;
+  color: var(--text-color);
+  background-color: var(--background-color);
 }
 
 main {
   margin: 10px;
+  margin-top: 70px;
+  margin-bottom: 40px;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-form, .flex-col {
-  display: inline-flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: stretch;
-}
-
-.flex-row {
-  display: inline-flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: flex-start;
+h1, h2, h3, h4, h5, h6 {
+  padding: 0;
+  margin: 0;
 }
 
 header, footer {
-  display: flex;
-  align-items: center;
-  margin: 10px;
+  position: fixed;
+  padding: 10px;
+  margin: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  background-color: var(--background-color);
+}
+
+header {
+  top: 0;
+  border-bottom: 1px solid var(--separator-color);
+}
+
+footer {
+  bottom: 0;
+  border-top: 1px solid var(--separator-color);
 }
 
 fieldset {
   display: inline-flex;
   flex-direction: column;
+  border-color: var(--separator-color);
 }
 
 legend {
@@ -52,10 +65,66 @@ textarea {
   overflow-y: auto;
 }
 
+.text-display {
+  margin: 10px 0;
+  width: 250px;
+  text-align: left;
+}
+
+.flex-col {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+}
+
+.flex-row {
+  display: inline-flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.flex-col.full, .flex-row.full {
+  display: flex;
+}
+
+.wrap {
+  flex-wrap: wrap;
+}
+
+.auth-form {
+  min-width: 350px;
+}
+
+.auth-form label {
+  margin: 5px 0;
+}
+
+.hint {
+  color: var(--hint-text-color);
+  font-style: italic;
+  margin-left: 15px;
+}
+
 .submit {
   padding: 10px 15px;
   padding-bottom: 0px;
   text-align: right;
+}
+
+.user-page-left {
+  margin: 5px;
+  text-align: center;
+}
+
+.user-page-right {
+  margin: 5px;
+}
+
+.friend-request textarea {
+  min-width: 300px;
+  min-height: 5em;
 }
 
 .user-controls, .grid-2 label {
@@ -81,24 +150,16 @@ textarea {
   color: var(--link-color);
 }
 
+input[type="submit"] {
+  cursor: pointer;
+}
+
 .grid-2 {
   margin: 5px;
   display: grid;
   grid-template-columns: max-content auto;
   grid-column-gap: .5em;
   grid-row-gap: 5px;
-}
-
-.user-controls * {
-  margin-bottom: 5px;
-}
-
-.member {
-  display: inline-flex;
-}
-
-.row {
-  display: block;
 }
 
 .fill {
@@ -109,9 +170,10 @@ textarea {
   align-items: stretch;
 }
 
-.member img {
-  width: 100px;
-  height: 100px;
+.spacer {
+  padding: 0;
+  margin: 0 10px;
+  color: var(--separator-color);
 }
 
 .avatar {
@@ -119,11 +181,45 @@ textarea {
   height: 250px;
 }
 
-.user-settings > form {
+.small-avatar {
+  width: 100px;
+  height: 100px;
+}
+
+.member, .user-settings > form {
   margin: 10px;
 }
 
-.edit-message {
+.member {
+  position: relative;
+  border: 1px solid var(--separator-color);
+  box-shadow: 2px 2px 10px var(--separator-color);
+}
+
+.member.together {
+  background-color: rgba(225, 225, 255, 0.2);
+}
+
+.alone-blind {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.member-status {
+  padding: 5px;
+  padding-right: 10px;
+}
+
+.status {
+  text-transform: capitalize;
+}
+
+.edit-message, .error-message {
   text-align: center;
   color: var(--attention-text-color);
   font-size: 1.5em;
@@ -131,6 +227,7 @@ textarea {
 }
 
 .top-float {
+  color: black;
   position: absolute;
   font-weight: bold;
   padding: 0.8em;
@@ -143,7 +240,7 @@ textarea {
 }
 
 #change-avatar {
-  border: 1px solid black;
+  border: 1px solid var(--separator-color);
   margin: 5px;
   position: relative;
   cursor: pointer;

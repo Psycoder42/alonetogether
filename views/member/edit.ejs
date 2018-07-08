@@ -18,7 +18,7 @@
   <main>
     <div class="flex-col user-settings">
       <div class="edit-message"><%= (updateMessage ? updateMessage : '') %></div>
-      <form class="form-user-edit" action="/members/<%= user.username %>" method="post">
+      <form class="flex-col form-user-edit" action="/members/<%= user.username %>" method="post">
         <input type="hidden" name="_method" value="patch">
         <input type="hidden" name="toUpdate" value="settings">
         <fieldset>
@@ -43,7 +43,7 @@
           </div>
         </fieldset>
       </form>
-      <form action="/members/<%= user.username %>" method="post">
+      <form class="flex-col" action="/members/<%= user.username %>" method="post">
         <input type="hidden" name="_method" value="patch">
         <input type="hidden" name="toUpdate" value="password">
         <fieldset>
@@ -62,7 +62,7 @@
           </div>
         </fieldset>
       </form>
-      <form action="/members/<%= user.username %>" method="post">
+      <form class="flex-col" action="/members/<%= user.username %>" method="post">
         <input type="hidden" name="_method" value="delete">
         <fieldset>
           <legend>DANGER ZONE</legend>

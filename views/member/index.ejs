@@ -8,23 +8,28 @@
   </head>
   <body>
   <%- include('../partials/header.ejs', { user: user }); %>
-    <h1>Members</h1>
+  <main>
+    <div class="flex-row full wrap">
     <% for (let member of allMembers) { %>
-    <a class="txt-link" href="/members/<%= member.username %>">
-      <div class="member">
-        <%
-          let visible = canSee(member, user);
-          let imgSrc = (visible ? member.profilePic : '/images/anon.svg');
-          let status = (member.friendsOnly ? 'alone' : 'together');
-        %>
-        <img src="<%= imgSrc %>" alt="<%= member.username %>">
-        <div class="member-summary">
-          <h3><%= member.username %></h3>
-          <p>Currently wants to be <%= status %>.</p>
+      <a class="txt-link" href="/members/<%= member.username %>">
+      <%
+        let visible = canSee(member, user);
+        let status = (!visible || member.friendsOnly ? 'alone' : 'together');
+      %>
+        <div class="flex-row member <%= status %>">
+          <img class="small-avatar" src="<%= member.profilePic %>" alt="<%= member.username %>">
+          <div class="flex-col member-status">
+            <h3><%= member.username %></h3>
+            <p class="status">Preference: <%= status %></p>
+          </div>
+          <% if (status ==  'alone') { %>
+          <div class="alone-blind"></div>
+          <% } %>
         </div>
-      </div>
-    </a>
+      </a>
     <% } %>
+    </div>
+  </main>
   <% include ../partials/footer.ejs %>
   </body>
 </html>

@@ -1,0 +1,9 @@
+<% if (user._id!=member._id && member.friends.indexOf(user.username)==-1) { %>
+<p>Why not become friends?</p>
+<form class="flex-col fill friend-request" action="/members/<%= member.username %>/befriend" method="post">
+  <textarea name="message">Hello, would you like to be friends?</textarea>
+  <div class="submit">
+    <input type="submit" value="Send Friend Request">
+  </div>
+</form>
+<% } %>

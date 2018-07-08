@@ -3,14 +3,36 @@
 <%
   let subtitle = ' - Member - ' + member.username;
   let imgSrc = (member.username ? member.username : '/images/anon.svg');
+  let biography = member.bio || '';
+  let paragraphs = biography.replace(/[\n\r]+/g,'\n').split('\n');
 %>
   <head>
   <%- include('../partials/head.ejs', { subtitle: subtitle }); %>
   </head>
   <body>
   <%- include('../partials/header.ejs', { user: user }); %>
-    <h1><%= member.username %></h1>
-    <img class="avatar" src="<%= member.profilePic %>" alt="<%= member.username %>">
+    <main>
+      <div class="flex-row full">
+        <div class="flex-col user-page-left">
+          <img class="avatar" src="<%= member.profilePic %>" alt="<%= member.username %>">
+          <h1><%= member.username %></h1>
+          <div class="text-display">
+          <% for (let p of paragraphs) { %>
+            <p><%= p %></p>
+          <% } %>
+          </div>
+          <h3>Friends</h3>
+          <div class="friends">
+          <% for (let f of member.friends) { %>
+            <a class="txt-link" href="/members<%= f %>"><%= f %></a>
+          <% } %>
+          </div>
+        </div>
+        <div class="flex-col fill user-page-right">
+        <%- include('../partials/friendRequest.ejs', {user:user, member:member}); %>
+        </div>
+      </div>
+    </main>
   <% include ../partials/footer.ejs %>
   </body>
 </html>

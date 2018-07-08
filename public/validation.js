@@ -13,8 +13,11 @@ module.exports.validatePassword = (str) => {
 module.exports.validateUsername = (str) => {
   let trimmed = (str+'').trim();
   let len = trimmed.length;
-  if (len < 3) {
-    return "Username is too short."
+  if (len < 4) {
+    return "Username must be at least 4 characters long."
+  }
+  if (len > 32) {
+    return "Username must be no more than 32 characters long."
   }
   let re = "^[-_\\.a-zA-Z0-9]{"+len+"}$";
   if (!trimmed.match(new RegExp(re))) {

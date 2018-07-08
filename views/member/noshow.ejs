@@ -8,13 +8,18 @@
   </head>
   <body>
   <%- include('../partials/header.ejs', { user: user }); %>
-    <h1><%= member.username %></h1>
-    <img class="avatar" src="/images/anon.svg" alt="<%= member.username %>">
-    <p>This member currently prefers to be alone.</p>
-    <form class="friend-request" action="/members/<%= member.username %>/befriend" method="post">
-      <textarea name="message">Hello, would you like to be friends?</textarea>
-      <input type="submit" value="Send Friend Request">
-    </form>
+    <main>
+      <div class="flex-row full">
+        <div class="flex-col user-page-left">
+          <img class="avatar" src="<%= member.profilePic %>" alt="<%= member.username %>">
+          <h1><%= member.username %></h1>
+        </div>
+        <div class="flex-col user-page-right">
+          <p>This member currently prefers to be alone.</p>
+        <%- include('../partials/friendRequest.ejs', {user:user, member:member}); %>
+        </div>
+      </div>
+    </main>
   <% include ../partials/footer.ejs %>
   </body>
 </html>

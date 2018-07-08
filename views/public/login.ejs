@@ -5,30 +5,37 @@
   let formAction = (isNew ? '/members/create' : '/login');
 %>
   <head>
-  <%- include('../partials/head.ejs', { subtitle: 'Log In' }); %>
+  <%- include('../partials/head.ejs', { subtitle: ' - '+subtitle }); %>
   </head>
   <body>
   <%- include('../partials/header.ejs', { user: user }); %>
-    <form class="auth-form" action="<%= formAction %>" method="post">
+    <main>
       <% if (error) { %>
       <div class="error-message"><%= error %></div>
       <% } %>
-      <label for="username">USERNAME
-        <% if (isNew) { %>
-        <span class="hint">Allowed Characters: a-zA-Z0-9._-</span>
-        <% } %>
-      </label>
-      <input type="text" name="username">
-      <label for="password">PASSWORD
-        <% if (isNew) { %>
-        <span class="hint">Must be at least 8 characters long (whitespace is trimmed)</span>
-        <% } else { %>
-        <span class="hint">Passwords are case sensative</span>
-        <% } %>
-      </label>
-      <input type="password" name="password">
-      <input type="submit" value="<%= subtitle %>">
-    </form>
+      <form class="auth-form flex-col" action="<%= formAction %>" method="post">
+        <label for="username">USERNAME
+          <% if (isNew) { %>
+          <span class="hint">Allowed Characters: a-zA-Z0-9._-</span>
+          <% } %>
+        </label>
+        <input type="text" name="username">
+        <label for="password">PASSWORD
+          <% if (isNew) { %>
+          <span class="hint">Must be at least 8 characters long</span>
+          <% } else { %>
+          <span class="hint">Passwords are case sensative</span>
+          <% } %>
+        </label>
+        <input type="password" name="password">
+        <div class="submit">
+          <input type="submit" value="<%= subtitle %>">
+        </div>
+      </form>
+      <% if (!isNew) { %>
+      <p>Not a member? <a class="txt-link" href="/members/new">Register here!</a> It's free and easy!</p>
+      <% } %>
+    </main>
   <% include ../partials/footer.ejs %>
   </body>
 </html>
