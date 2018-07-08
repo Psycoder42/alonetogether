@@ -15,9 +15,17 @@ const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(express.static('./public'));
-app.use(express.urlencoded({extended: false}));
 app.use(express.json());
-app.use(methodOverride('_method'));
+app.use(express.urlencoded({extended: false}));
+app.use((req, res, next) => {
+  // Move the _method property from the body to the headers
+  if (req.body._method) {
+    req.headers['x-method-override'] = req.body._method
+    delete req.body._method;
+  }
+  next();
+});
+app.use(methodOverride('x-method-override'));
 app.use(session({
   resave: false,
   saveUninitialized: false,

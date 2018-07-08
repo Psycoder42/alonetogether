@@ -18,10 +18,11 @@
   <main>
     <div class="flex-col user-settings">
       <div class="edit-message"><%= (updateMessage ? updateMessage : '') %></div>
-      <form class="form-user-edit" action="/members/<%= user.username %>?_method=put" method="post">
+      <form class="form-user-edit" action="/members/<%= user.username %>" method="post">
+        <input type="hidden" name="_method" value="patch">
         <input type="hidden" name="toUpdate" value="settings">
         <fieldset>
-          <legend>Basic Settings</legend>
+          <legend>Profile Settings</legend>
           <div class="flex-row stretch">
             <div id="change-avatar">
               <div class="top-float">Click to Change</div>
@@ -42,7 +43,8 @@
           </div>
         </fieldset>
       </form>
-      <form action="/members/<%= user.username %>?_method=put" method="post">
+      <form action="/members/<%= user.username %>" method="post">
+        <input type="hidden" name="_method" value="patch">
         <input type="hidden" name="toUpdate" value="password">
         <fieldset>
           <legend>Update Password</legend>
@@ -60,7 +62,8 @@
           </div>
         </fieldset>
       </form>
-      <form action="/members/<%= user.username %>?_method=delete" method="post">
+      <form action="/members/<%= user.username %>" method="post">
+        <input type="hidden" name="_method" value="delete">
         <fieldset>
           <legend>DANGER ZONE</legend>
           <p>

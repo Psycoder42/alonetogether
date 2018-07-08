@@ -4,7 +4,8 @@
     <%= user.username %>
   </a>
   <a class="txt-link row" href="/members/<%= user.username %>/account">Settings</a>
-  <form action="/login?_method=delete" method="post">
+  <form action="/login" method="post">
+    <input type="hidden" name="_method" value="delete">
     <input class="txt-button" type="submit" value="Log Out">
   </form>
 <% } else { %>

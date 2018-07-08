@@ -28,6 +28,22 @@ const getAvatar = () => {
   return null;
 }
 
+// Return the path to the user selected avatar or null if bad input
+const getSelectedAvatar = (str) => {
+  try {
+    let userFileName = path.basename(str);
+    let imgDir = path.resolve(__dirname, '../public/images/avatars/');
+    let userImg = path.resolve(imgDir, userFileName);
+    if (fs.existsSync(userImg)) {
+      return '/images/avatars/'+userFileName;
+    }
+  } catch (err) {
+    // Log for debugging purposes
+    console.log(err.message);
+  }
+  return null;
+}
+
 // Return true if m1 can view m2 details
 const canSee = (m1, m2) => {
   // Shortcut if it is themself
@@ -125,7 +141,44 @@ router.post('/create', (req, res)=>{
 
 // Logic to update the basic settings
 const updateMemberSettings = (req, res) => {
-
+  // Validate that the profile pic is one of the available set
+  let profilePic = getSelectedAvatar(pageUtils.cleanString(req.body.profilePic));
+  if (!profilePic) {
+    res.render('member/edit.ejs', {
+      user: req.session.curUser,
+      member: req.session.curUser,
+      updateMessage: 'Unknown avatar selection.'
+    });
+    return;
+  }
+  // Update the user settings and return the usee the edit page
+  let friendsOnly = pageUtils.isChecked(req.body.friendsOnly);
+  let bio = pageUtils.cleanString(req.body.bio);
+  let update = {$set: {bio: bio, profilePic: profilePic, friendsOnly: friendsOnly}};
+  Member.findByIdAndUpdate(
+    req.session.curUser._id,
+    update,
+    {new: true},
+    (err, data)=>{
+      if (err || !data) {
+        // Log it and show the error on the edit page
+        if (err) console.log(err.message);
+        res.render('member/edit.ejs', {
+          user: req.session.curUser,
+          member: req.session.curUser,
+          updateMessage: "Update failed. Please try again later."
+        });
+      } else {
+        // Update the session and show success
+        req.session.curUser = data;
+        res.render('member/edit.ejs', {
+          user: req.session.curUser,
+          member: req.session.curUser,
+          updateMessage: "Profile updated successfully."
+        });
+      }
+    }
+  );
 }
 
 // Logic to update the member password
@@ -180,7 +233,7 @@ const updateMemberPassword = (req, res) => {
 }
 
 // Update basic information (Update route)
-router.put('/:username', (req, res)=>{
+router.patch('/:username', (req, res)=>{
   let name = pageUtils.cleanString(req.params.username);
   if (req.session.curUser.username != name) {
     // User is trying to modify someone else
@@ -202,7 +255,7 @@ router.put('/:username', (req, res)=>{
 });
 
 // Update password (Update route)
-router.put('/:username/password', (req, res)=>{
+router.patch('/:username/password', (req, res)=>{
   let name = pageUtils.cleanString(req.params.username);
   if (req.session.curUser.username != name) {
     // User is trying to modify someone else
