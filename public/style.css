@@ -1,6 +1,7 @@
 :root {
   --link-color: yellow;
   --accent-text-color: bisque;
+  --attention-text-color: orange;
 }
 
 html {
@@ -120,6 +121,13 @@ textarea {
 
 .user-settings > form {
   margin: 10px;
+}
+
+.edit-message {
+  text-align: center;
+  color: var(--attention-text-color);
+  font-size: 1.5em;
+  font-weight: bold;
 }
 
 .top-float {

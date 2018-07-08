@@ -19,6 +19,7 @@
     <div class="flex-col user-settings">
       <div class="edit-message"><%= (updateMessage ? updateMessage : '') %></div>
       <form class="form-user-edit" action="/members/<%= user.username %>?_method=put" method="post">
+        <input type="hidden" name="toUpdate" value="settings">
         <fieldset>
           <legend>Basic Settings</legend>
           <div class="flex-row stretch">
@@ -41,7 +42,8 @@
           </div>
         </fieldset>
       </form>
-      <form action="/members/<%= user.username %>/password" method="post">
+      <form action="/members/<%= user.username %>?_method=put" method="post">
+        <input type="hidden" name="toUpdate" value="password">
         <fieldset>
           <legend>Update Password</legend>
           <div id="pass-change-error" class="error"></div>

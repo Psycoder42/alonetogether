@@ -123,7 +123,63 @@ router.post('/create', (req, res)=>{
   });
 });
 
-// Specific member page (Update route)
+// Logic to update the basic settings
+const updateMemberSettings = (req, res) => {
+
+}
+
+// Logic to update the member password
+const updateMemberPassword = (req, res) => {
+  // Validate they are the correct user
+  let curPass = pageUtils.cleanString(req.body.currentPass);
+  if (!security.matchesHash(curPass, req.session.curUser.password)) {
+    res.render('member/edit.ejs', {
+      user: req.session.curUser,
+      member: req.session.curUser,
+      updateMessage: 'Incorrect current password.'
+    });
+    return;
+  }
+  // Validate the new password
+  let newPass = pageUtils.cleanString(req.body.newPass);
+  let passError = validation.validatePassword(newPass);
+  if (passError) {
+    res.render('member/edit.ejs', {
+      user: req.session.curUser,
+      member: req.session.curUser,
+      updateMessage: passError
+    });
+    return
+  }
+  // Update the password and return them to the settings page
+  let update = {$set: {password: security.hash(newPass)}};
+  Member.findByIdAndUpdate(
+    req.session.curUser._id,
+    update,
+    {new: true},
+    (err, data)=>{
+      if (err || !data) {
+        // Log it and show the error on the edit page
+        if (err) console.log(err.message);
+        res.render('member/edit.ejs', {
+          user: req.session.curUser,
+          member: req.session.curUser,
+          updateMessage: "Update failed. Please try again later."
+        });
+      } else {
+        // Update the session and show success
+        req.session.curUser = data;
+        res.render('member/edit.ejs', {
+          user: req.session.curUser,
+          member: req.session.curUser,
+          updateMessage: "Password updated successfully."
+        });
+      }
+    }
+  );
+}
+
+// Update basic information (Update route)
 router.put('/:username', (req, res)=>{
   let name = pageUtils.cleanString(req.params.username);
   if (req.session.curUser.username != name) {
@@ -131,6 +187,35 @@ router.put('/:username', (req, res)=>{
     console.log(req.session.curUser.username, 'tried to modify', name);
     res.redirect('back');
   } else {
+    if (req.body.toUpdate == 'settings') {
+      updateMemberSettings(req, res);
+    } else if (req.body.toUpdate == 'password') {
+      updateMemberPassword(req, res);
+    } else {
+      res.render('member/edit.ejs', {
+        user: req.session.curUser,
+        member: req.session.curUser,
+        updateMessage: 'Unknown form submission.'
+      });
+    }
+  }
+});
+
+// Update password (Update route)
+router.put('/:username/password', (req, res)=>{
+  let name = pageUtils.cleanString(req.params.username);
+  if (req.session.curUser.username != name) {
+    // User is trying to modify someone else
+    console.log(req.session.curUser.username, 'tried to modify', name);
+    res.redirect('back');
+  } else {
+    // Validate the new password
+    let pass = pageUtils.cleanString(req.body.newPass);
+    let passError = validation.validatePassword(pass);
+    if (passError) {
+      return
+    }
+
     let updates = {
       friendsOnly: pageUtils.isChecked(req.body.friendsOnly),
       bio: pageUtils.cleanString(req.body.bio)
