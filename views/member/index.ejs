@@ -4,12 +4,13 @@
   let subtitle = ' - Members';
 %>
   <head>
-  <%- include('../partials/header.ejs', { subtitle: subtitle }); %>
+  <%- include('../partials/head.ejs', { subtitle: subtitle }); %>
   </head>
   <body>
+  <%- include('../partials/header.ejs', { user: user }); %>
     <h1>Members</h1>
     <% for (let member of allMembers) { %>
-    <a href="/members/<%= member.username %>">
+    <a class="txt-link" href="/members/<%= member.username %>">
       <div class="member">
         <%
           let visible = canSee(member, user);

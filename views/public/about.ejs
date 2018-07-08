@@ -1,10 +1,18 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
   <head>
-  <%- include('../partials/header.ejs', { subtitle: 'About' }); %>
+  <%- include('../partials/head.ejs', { subtitle: 'About' }); %>
   </head>
   <body>
-    <div>Avatars made by <a href="http://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> licensed under <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC BY 3.0</a></div>
+  <%- include('../partials/header.ejs', { user: user }); %>
+    <div>
+      Avatars made by
+      <a class="txt-link" href="http://www.freepik.com" title="Freepik">Freepik</a>
+      from
+      <a class="txt-link" href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>
+      licensed under
+      <a class="txt-link" href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC BY 3.0</a>
+    </div>
   <% include ../partials/footer.ejs %>
   </body>
 </html>

@@ -1,3 +1,9 @@
-<meta charset="utf-8">
-<title>AloneTogether<%= (subtitle ? subtitle : '') %></title>
-<link rel="stylesheet" href="/style.css">
+<header>
+<% let homeLoc = (user ? '/members' : '/'); %>
+  <div class="start fill">
+    <h1><a class="txt-link" href="<%= homeLoc %>">AloneTogether</a></h1>
+  </div>
+  <div class="end">
+    <%- include('userControls.ejs', { user: user }); %>
+  </div>
+</header>

@@ -5,14 +5,12 @@
   let imgSrc = (member.username ? member.username : '/images/anon.svg');
 %>
   <head>
-  <%- include('../partials/header.ejs', { subtitle: subtitle }); %>
+  <%- include('../partials/head.ejs', { subtitle: subtitle }); %>
   </head>
   <body>
+  <%- include('../partials/header.ejs', { user: user }); %>
     <h1><%= member.username %></h1>
     <img class="avatar" src="<%= member.profilePic %>" alt="<%= member.username %>">
-    <% if (user._id == member._id) { %>
-    <a href="/members/<%= member.username %>/account">Account Settings</a>
-    <% } %>
   <% include ../partials/footer.ejs %>
   </body>
 </html>

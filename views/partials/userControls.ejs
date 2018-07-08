@@ -1,0 +1,15 @@
+<div class="user-controls">
+<% if (user) { %>
+  <a class="txt-link row" href="/members/<%= user.username %>">
+    <%= user.username %>
+  </a>
+  <a class="txt-link row" href="/members/<%= user.username %>/account">Settings</a>
+  <form action="/login?_method=delete" method="post">
+    <input class="txt-button" type="submit" value="Log Out">
+  </form>
+<% } else { %>
+  <a href="/login">
+    <button class="txt-button" type="button">Log In</button>
+  </a>
+<% } %>
+</div>

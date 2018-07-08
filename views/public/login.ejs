@@ -5,9 +5,10 @@
   let formAction = (isNew ? '/members/create' : '/login');
 %>
   <head>
-  <%- include('../partials/header.ejs', { subtitle: 'Log In' }); %>
+  <%- include('../partials/head.ejs', { subtitle: 'Log In' }); %>
   </head>
   <body>
+  <%- include('../partials/header.ejs', { user: user }); %>
     <form class="auth-form" action="<%= formAction %>" method="post">
       <% if (error) { %>
       <div class="error-message"><%= error %></div>

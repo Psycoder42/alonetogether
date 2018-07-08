@@ -5,14 +5,74 @@
   let imgSrc = (member.username ? member.username : '/images/anon.svg');
 %>
   <head>
-  <%- include('../partials/header.ejs', { subtitle: subtitle }); %>
+  <%- include('../partials/head.ejs', { subtitle: subtitle }); %>
+    <script
+      src="https://code.jquery.com/jquery-3.3.1.min.js"
+      integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+      crossorigin="anonymous">
+    </script>
+    <script type="text/javascript" src="/client.js"></script>
   </head>
   <body>
-    <h1>Settings</h1>
-    <img class="avatar" src="<%= member.profilePic %>" alt="<%= member.username %>">
-    <form action="/members/<%= imgSrc %>?_method=delete" method="post">
-      <input type="submit" value="Delete My Account">
-    </form>
+  <%- include('../partials/header.ejs', { user: user }); %>
+  <main>
+    <div class="flex-col user-settings">
+      <div class="edit-message"><%= (updateMessage ? updateMessage : '') %></div>
+      <form class="form-user-edit" action="/members/<%= user.username %>?_method=put" method="post">
+        <fieldset>
+          <legend>Basic Settings</legend>
+          <div class="flex-row stretch">
+            <div id="change-avatar">
+              <div class="top-float">Click to Change</div>
+              <img class="avatar" src="<%= member.profilePic %>" alt="<%= member.username %>">
+              <input type="hidden" name="profilePic" value="<%= member.profilePic %>">
+            </div>
+            <div class="flex-col fill">
+              <label for="bio">Biography:</label>
+              <textarea class="fill" name="bio" placeholder="Say a little bit about yourself..."><%= (user.bio ? user.bio : '') %></textarea>
+              <div>
+                <input type="checkbox" name="friendsOnly" <%= (user.friendsOnly ? 'checked' : '') %>>
+                <label for="friendsOnly">Only allow friends to view profile.</label>
+              </div>
+            </div>
+          </div>
+          <div class="submit">
+            <input type="submit" value="Save Changes">
+          </div>
+        </fieldset>
+      </form>
+      <form action="/members/<%= user.username %>/password" method="post">
+        <fieldset>
+          <legend>Update Password</legend>
+          <div id="pass-change-error" class="error"></div>
+          <div class="grid-2">
+            <label for="currentPass">Current Password:</label>
+            <input type="password" name="currentPass">
+            <label for="newPass">New Password:</label>
+            <input type="password" name="newPass">
+            <label for="newPassConfirm">Confim Password:</label>
+            <input type="password" name="newPassConfirm">
+          </div>
+          <div class="submit">
+            <input id="pass-change" class="button" type="submit" value="Update Password">
+          </div>
+        </fieldset>
+      </form>
+      <form action="/members/<%= user.username %>?_method=delete" method="post">
+        <fieldset>
+          <legend>DANGER ZONE</legend>
+          <p>
+            This will permantly delete your account. There is no undo for this action.
+            Any and all infromation you provided will not be recoverable. You will be
+            given only one change to back out if you press this button.
+          </p>
+          <div class="submit">
+            <input id="delete-account" class="button" type="submit" value="Delete My Account">
+          </div>
+        </fieldset>
+      </form>
+    </div>
+  </main>
   <% include ../partials/footer.ejs %>
   </body>
 </html>

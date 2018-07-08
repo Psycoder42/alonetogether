@@ -135,7 +135,6 @@ router.put('/:username', (req, res)=>{
       friendsOnly: pageUtils.isChecked(req.body.friendsOnly),
       bio: pageUtils.cleanString(req.body.bio)
     };
-    Member.findByIdAndUpdate
   }
   res.send('Updating member settings');
 });
@@ -195,7 +194,8 @@ router.get('/:username/account', (req, res)=>{
   } else {
     res.render('member/edit.ejs', {
       user: req.session.curUser,
-      member: req.session.curUser
+      member: req.session.curUser,
+      updateMessage: null
     });
   }
 });
