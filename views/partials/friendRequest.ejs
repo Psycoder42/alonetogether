@@ -7,6 +7,7 @@
 %>
 <div class="flex-col fill friend-request-msg">
   <p>Friend request sent. Awaiting reply.</p>
+  <a class="txt-link" href="/members/<%= member.username %>/revoke">Withdraw Request</a>
 </div>
 <%  } else if (inFlight) { %>
 <div class="flex-col fill friend-request-msg">

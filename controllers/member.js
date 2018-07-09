@@ -313,8 +313,9 @@ router.get('/:username', async (req, res)=>{
       let friendRequest = await Message.findOne(criteria);
       let frExists = (friendRequest ? true : false);
       // Switch which page is shown based on user settings/relation
+      let fullySee = curUser.isAdmin || canSee(foundUser, curUser);
       res.render(
-        (canSee(foundUser, curUser) ? 'member/show.ejs' : 'member/noshow.ejs'),
+        (fullySee ? 'member/show.ejs' : 'member/noshow.ejs'),
         {user: curUser, member: foundUser, awaitingReply: frExists, splitMessage: splitMessage}
       );
     }
@@ -323,6 +324,29 @@ router.get('/:username', async (req, res)=>{
     console.log(err.message);
     res.redirect(req.baseUrl);
   }
+});
+
+// Revoke a friend request
+router.get('/:username/revoke', async (req, res)=>{
+  try {
+    let curUser = req.session.curUser;
+    let name = pageUtils.cleanString(req.params.username);
+    let pending = (curUser.pending.indexOf(name) != -1);
+    if (pending) {
+      // Remove the pending status
+      let update = {$pull: {pending: name}};
+      curUser = await Member.findByIdAndUpdate(curUser._id, update, {new: true});
+      req.session.curUser = curUser;
+      // Delete the request
+      let toRemove = {sender: curUser.username, recipient: name, isFriendInvite: true};
+      let removedRequest = await Message.remove(toRemove);
+    }
+  } catch (err) {
+    // Log for debugging purposes
+    console.log(err.message);
+  }
+  // Send the user back
+  res.redirect('back');
 });
 
 // Send a user a friend invite
@@ -434,6 +458,11 @@ router.post('/:username/blacklist', async (req, res)=>{
   // Send the user back
   res.redirect('back');
 });
+
+// Unresolved get requests should direct back to the member index
+router.get('/*', (req, res)=>{
+  res.redirect(req.baseUrl);
+})
 
 // Export the router for use as middleware
 module.exports = router;
