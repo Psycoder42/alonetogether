@@ -50,6 +50,9 @@ app.use('/members', memberRoutes);
 // Message routes
 const messageRoutes = require('./controllers/message.js');
 app.use('/messages', messageRoutes);
+// Post routes
+const postRoutes = require('./controllers/post.js');
+app.use('/posts', postRoutes);
 // Public routes
 const publicRoutes = require('./controllers/public.js');
 app.use('/', publicRoutes);

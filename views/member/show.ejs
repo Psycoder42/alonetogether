@@ -1,11 +1,21 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <%
+  let self = (user._id == member._id);
   let subtitle = ' - Member - ' + member.username;
   let imgSrc = (member.username ? member.username : '/images/anon.svg');
+  let blacklisted = (user.blacklist.indexOf(member.username) != -1);
+  let alreadyFriends = (user.friends.indexOf(member.username) != -1);
+  let hideFriendInvite = ((self || blacklisted || alreadyFriends));
 %>
   <head>
   <%- include('../partials/head.ejs', { subtitle: subtitle }); %>
+    <script
+      src="https://code.jquery.com/jquery-3.3.1.min.js"
+      integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+      crossorigin="anonymous">
+    </script>
+    <script type="text/javascript" src="/popups.js"></script>
   </head>
   <body>
   <%- include('../partials/header.ejs', { user: user }); %>
@@ -14,10 +24,13 @@
         <div class="flex-col user-page-left">
           <img class="avatar" src="<%= member.profilePic %>" alt="<%= member.username %>">
           <h1><%= member.username %></h1>
-          <div class="text-display">
-          <% for (let p of splitMessage(member.bio)) { %>
-            <p><%= p %></p>
-          <% } %>
+          <div class="flex-row full">
+            <% if (!hideFriendInvite) { %>
+            <button id="fr-open" type="button" class="button">Friend Request</button>
+            <% } %>
+            <% if (!self) { %>
+            <button id="msg-open" type="button" class="button">Direct Message</button>
+            <% } %>
           </div>
           <h3>Friends</h3>
           <div class="friends">
@@ -27,14 +40,65 @@
           </div>
         </div>
         <div class="flex-col fill user-page-right">
-        <%- include('../partials/friendRequest.ejs', {user:user, member:member, inFlight: awaitingReply}); %>
-        <% if (member._id != user._id) { %>
-          <p>Send a direct message</p>
-          <%- include('../partials/sendMessage.ejs', {user:user, member:member}); %>
+        <% if (member.bio) { %>
+        <fieldset class="bio-wrapper">
+          <legend>About <%= member.username %></legend>
+          <div class="text-display">
+          <% for (let p of splitMessage(member.bio)) { %>
+            <p><%= p %></p>
+          <% } %>
+          </div>
+        </fieldset>
+        <% } %>
+        <% if (self) { %>
+        <% include ../partials/postForm.ejs %>
+        <% } %>
+        <% if (visiblePosts.length == 0) { %>
+          <h2 class="info-text">No posts to display</h2>
+        <% } %>
+        <% for (let post of visiblePosts) { %>
+          <div class="flex-row full stretch">
+            <div class="flex-col full fill user-post">
+              <% if (self) { %>
+              <h6 class="actions">
+                <a class="txt-link" href="/posts/<%= post._id %>">Edit</a>
+                <form action="/posts/<%= post._id %>" method="post">
+                  <input type="hidden" name="_method" value="delete">
+                  <input class="txt-button" type="submit" value="Delete">
+                </form>
+              </h6>
+              <% } %>
+              <div class="post-display">
+              <% for (let p of splitMessage(post.content)) { %>
+                <p><%= p %></p>
+              <% } %>
+              </div>
+              <%
+                let created = post.createdAt.toString();
+                let modified = post.updatedAt.toString();
+                let edited = (created==modified ? '' : ' - Edited');
+              %>
+              <h6 class="timestamp">Posted: <%= post.createdAt+edited %></h6>
+            </div>
+          </div>
         <% } %>
         </div>
       </div>
     </main>
+    <div class="flex-col modal">
+      <% if (!hideFriendInvite) { %>
+      <div class="flex-col popup friend-invite">
+        <h3>Invite <%= member.username %> to be your friend</h3>
+        <%- include('../partials/friendRequest.ejs', {user:user, member:member, inFlight: awaitingReply}); %>
+      </div>
+      <% } %>
+      <% if (!self) { %>
+      <div class="flex-col popup direct-message">
+        <h3>Send <%= member.username %> a direct message</h3>
+      <%- include('../partials/sendMessage.ejs', {user:user, member:member}); %>
+      </div>
+      <% } %>
+    </div>
   <% include ../partials/footer.ejs %>
   </body>
 </html>

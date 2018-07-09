@@ -1,21 +1,15 @@
-<%
-  let self = (user._id == member._id);
-  let blacklisted = (user.blacklist.indexOf(member.username) != -1);
-  let alreadyFriends = (user.friends.indexOf(member.username) != -1);
-  if (!(self || blacklisted || alreadyFriends)) {
-    if (user.pending.indexOf(member.username) != -1) {
-%>
+<% if (user.pending.indexOf(member.username) != -1) { %>
 <div class="flex-col fill friend-request-msg">
-  <p>Friend request sent. Awaiting reply.</p>
-  <a class="txt-link" href="/members/<%= member.username %>/revoke">Withdraw Request</a>
+  <p>Friend request sent. Awaiting reply.
+  (<a class="txt-link" href="/members/<%= member.username %>/revoke">Withdraw Request</a>)
+  </p>
 </div>
-<%  } else if (inFlight) { %>
+<% } else if (inFlight) { %>
 <div class="flex-col fill friend-request-msg">
   <p><%= member.username %> has sent you a friend request and is awaiting a reply.</p>
 </div>
-<%  } else { %>
+<% } else { %>
 <div class="flex-col fill friend-request">
-  <p>Why not become friends?</p>
   <form class="flex-col fill" action="/members/<%= member.username %>/befriend" method="post">
     <textarea name="message">Hello, would you like to be friends?</textarea>
     <div class="submit">
@@ -23,7 +17,4 @@
     </div>
   </form>
 </div>
-<%
-    }
-  }
-%>
+<% } %>

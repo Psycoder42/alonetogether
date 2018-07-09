@@ -16,11 +16,10 @@
         </div>
         <div class="flex-col fill user-page-right">
           <p>This member currently prefers to be alone.</p>
-        <%- include('../partials/friendRequest.ejs', {user:user, member:member, inFlight: awaitingReply}); %>
         <% if (member._id != user._id) { %>
-          <p>Send a direct message</p>
-          <%- include('../partials/sendMessage.ejs', {user:user, member:member}); %>
+        <%- include('../partials/sendMessage.ejs', {user:user, member:member}); %>
         <% } %>
+        <%- include('../partials/friendRequest.ejs', {user:user, member:member, inFlight: awaitingReply}); %>
         </div>
       </div>
     </main>

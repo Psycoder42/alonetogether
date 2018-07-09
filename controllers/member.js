@@ -6,6 +6,7 @@ const path = require('path');
 const fs = require('fs');
 
 // Custom modules
+const posts = require('../models/post.js');
 const members = require('../models/member.js');
 const messages = require('../models/message.js');
 const pageUtils = require('../utils/pageUtils.js');
@@ -13,6 +14,7 @@ const security = require('../utils/securityUtils.js');
 const validation = require('../public/validation.js');
 
 // DB interactivity
+const Post = posts.getModel(mongoose.connection);
 const Member = members.getModel(mongoose.connection);
 const Message = messages.getModel(mongoose.connection);
 
@@ -298,6 +300,8 @@ router.delete('/:username', async (req, res)=>{
       await Message.remove({sender: curUser.username, isFriendInvite: true});
       // Delete all the messages sent to this user
       await Message.remove({recipient: curUser.username});
+      // Delete all the posts by this user
+      await Post.remove({author: curUser.username});
       // Delete the user
       await Member.findByIdAndRemove(curUser._id);
       // Log the now deleted user out and redirect to main landing page
@@ -325,11 +329,20 @@ router.get('/:username', async (req, res)=>{
       let criteria = {sender: foundUser.username, recipient: curUser.username, isFriendInvite: true};
       let friendRequest = await Message.findOne(criteria);
       let frExists = (friendRequest ? true : false);
+      // Get the posts this user can see
+      let opts = {sort: {createdAt: -1}};
+      let foundPosts = await Post.find(posts.getPostQuery(foundUser, curUser), {}, opts);
       // Switch which page is shown based on user settings/relation
       let fullySee = curUser.isAdmin || canSee(foundUser, curUser);
       res.render(
         (fullySee ? 'member/show.ejs' : 'member/noshow.ejs'),
-        {user: curUser, member: foundUser, awaitingReply: frExists, splitMessage: splitMessage}
+        {
+          user: curUser,
+          member: foundUser,
+          visiblePosts: foundPosts,
+          awaitingReply: frExists,
+          splitMessage: splitMessage
+        }
       );
     }
   } catch (err) {

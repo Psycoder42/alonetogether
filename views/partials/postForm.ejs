@@ -1,0 +1,11 @@
+<form class="flex-col fill make-post" action="/posts" method="post">
+  <textarea name="content" placeholder="Write whatever you want..."></textarea>
+  <div class="submit">
+    <select name="scope">
+      <option value="all" selected>Everyone</option>
+      <option value="friends">Friends Only</option>
+      <option value="self">Myself</option>
+    </select>
+    <input type="submit" value="Post">
+  </div>
+</form>
