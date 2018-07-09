@@ -263,10 +263,11 @@ const updateMemberPassword = async (req, res) => {
 
 // Update basic information (Update route)
 router.patch('/:username', (req, res)=>{
+  let curUser = req.session.curUser;
   let name = pageUtils.cleanString(req.params.username);
-  if (req.session.curUser.username!=name && !req.session.curUser.isAdmin) {
+  if (curUser.username!=name && !curUser.isAdmin) {
     // Non-admin user is trying to modify someone else
-    console.log(req.session.curUser.username, 'tried to modify', name);
+    console.log(curUser.username, 'tried to modify', name);
     res.redirect('back');
   } else {
     if (req.body.toUpdate == 'settings') {
@@ -275,8 +276,8 @@ router.patch('/:username', (req, res)=>{
       updateMemberPassword(req, res);
     } else {
       res.render('member/edit.ejs', {
-        user: req.session.curUser,
-        member: req.session.curUser,
+        user: curUser,
+        member: curUser,
         updateMessage: 'Unknown form submission.'
       });
     }
@@ -286,13 +287,19 @@ router.patch('/:username', (req, res)=>{
 // Specific member page (Destroy route)
 router.delete('/:username', async (req, res)=>{
   try {
+    let curUser = req.session.curUser;
     let name = pageUtils.cleanString(req.params.username);
-    if (req.session.curUser.username!=name && !req.session.curUser.isAdmin) {
+    if (curUser.username!=name && !curUser.isAdmin) {
       // Non-admin user is trying to delete someone else
-      console.log(req.session.curUser.username, 'tried to delete', name);
+      console.log(curUser.username, 'tried to delete', name);
       res.redirect('back');
     } else {
-      let removedUser = await Member.findByIdAndRemove(req.session.curUser._id);
+      // Delete all the pending friend requests by this user
+      await Message.remove({sender: curUser.username, isFriendInvite: true});
+      // Delete all the messages sent to this user
+      await Message.remove({recipient: curUser.username});
+      // Delete the user
+      await Member.findByIdAndRemove(curUser._id);
       // Log the now deleted user out and redirect to main landing page
       req.session.curUser = null;
       res.redirect('/');
@@ -345,13 +352,13 @@ router.get('/:username/revoke', async (req, res)=>{
       req.session.curUser = curUser;
       // Delete the request
       let toRemove = {sender: curUser.username, recipient: name, isFriendInvite: true};
-      let removedRequest = await Message.remove(toRemove);
+      await Message.remove(toRemove);
     }
   } catch (err) {
     // Log for debugging purposes
     console.log(err.message);
   }
-  // Send the user back
+  // Send them back
   res.redirect('back');
 });
 
@@ -384,7 +391,7 @@ router.post('/:username/befriend', async (req, res)=>{
           message: pageUtils.cleanString(req.body.message),
           isFriendInvite: true
         };
-        let newMessage = await Message.create(friendRequest);
+        await Message.create(friendRequest);
       }
     }
   } catch (err) {
@@ -398,13 +405,12 @@ router.post('/:username/befriend', async (req, res)=>{
 // Logic for defreinding - returns the updated curUser
 const defriend = async (curUser, member) => {
   // don't use a try/catch so any errors will propogate up
-  let updatedMember = await Member.findByIdAndUpdate(member._id, {
+  await Member.findByIdAndUpdate(member._id, {
     $pull: {friends: curUser.username}
   });
-  let updatedUser = await Member.findByIdAndUpdate(curUser._id, {
+  return await Member.findByIdAndUpdate(curUser._id, {
     $pull: {friends: member.username}
   });
-  return updatedUser;
 }
 
 // Defriend a member
@@ -454,14 +460,14 @@ router.post('/:username/blacklist', async (req, res)=>{
           // Only delete the friend requests
           toDelete.isFriendInvite = true;
         }
-        let removedMessages = await Message.remove(toDelete);
+        await Message.remove(toDelete);
       }
     }
   } catch (err) {
     // Log for debugging purposes
     console.log(err.message);
   }
-  // Send the user back
+  // Send them back
   res.redirect('back');
 });
 

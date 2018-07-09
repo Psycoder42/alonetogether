@@ -64,7 +64,7 @@
                   <div class="msg-buttons">
                     <form action="/messages/<%= message._id %>" method="post">
                       <input type="hidden" name="_method" value="delete">
-                      <input type="submit" value="Accept">
+                      <input type="submit" value="Delete">
                     </form>
                     <form action="/members/<%= message.sender %>/blacklist" method="post">
                       <input type="submit" value="Blacklist">
