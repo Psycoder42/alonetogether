@@ -14,7 +14,7 @@
           <img class="avatar" src="<%= member.profilePic %>" alt="<%= member.username %>">
           <h1><%= member.username %></h1>
         </div>
-        <div class="flex-col user-page-right">
+        <div class="flex-col fill user-page-right">
           <p>This member currently prefers to be alone.</p>
         <%- include('../partials/friendRequest.ejs', {user:user, member:member}); %>
         </div>

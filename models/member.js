@@ -3,15 +3,16 @@ const mongoose = require('mongoose');
 
 // Schema definition
 const memberSchema = mongoose.Schema({
-  username: {type: String, required: true, unique: true},
+  internalName: {type: String, required: true, unique: true},
+  username: {type: String, required: true},
   password: {type: String, required: true},
   isAdmin: {type: Boolean, default: false},
   friendsOnly: {type: Boolean, default: false},
   profilePic: String,
   bio: String,
-  inbox: [String],
   blacklist: [String],
-  friends: [String]
+  friends: [String],
+  pending: [String]
 });
 
 // Model exports

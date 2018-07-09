@@ -20,7 +20,7 @@ module.exports.isChecked = (value) => {
 // Return a trimmed string. If the string is empty and a default was
 // passed, return the default instead
 module.exports.cleanString = (str, fallback=null) => {
-  let cleaned = (str+'').trim();
+  let cleaned = (str ? str.trim() : '');
   if (cleaned.length==0 && fallback!=null) {
     return fallback;
   }

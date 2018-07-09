@@ -7,12 +7,14 @@ const fs = require('fs');
 
 // Custom modules
 const members = require('../models/member.js');
+const messages = require('../models/message.js');
 const pageUtils = require('../utils/pageUtils.js');
 const security = require('../utils/securityUtils.js');
 const validation = require('../public/validation.js');
 
 // DB interactivity
 const Member = members.getModel(mongoose.connection);
+const Message = messages.getModel(mongoose.connection);
 
 // Pick a random avatar image
 const getAvatar = () => {
@@ -58,6 +60,15 @@ const canSee = (m1, m2) => {
   }
 }
 
+// Return an array of paragraphs
+const splitMessage = (message) => {
+  let cleaned = pageUtils.cleanString(message);
+  return cleaned.replace(/[\n\r]+/g,'\n').split('\n').reduce((arr, elem)=>{
+    if (elem.trim().length > 0) arr.push(elem);
+    return arr;
+  },[]);
+}
+
 // These routes are for authenticated users only (with exceptions)
 const exceptions = ['/new', '/create'];
 router.use(security.authenticated('curUser', '/login', exceptions));
@@ -76,6 +87,40 @@ router.get('/', (req, res)=>{
       user: req.session.curUser,
       allMembers: allMembers,
       canSee: canSee
+    });
+  })
+});
+
+// Modify member (Edit route)
+router.get('/account', (req, res)=>{
+  res.render('member/edit.ejs', {
+    user: req.session.curUser,
+    member: req.session.curUser,
+    updateMessage: null
+  });
+});
+
+// Modify member (Edit route)
+router.get('/inbox', (req, res)=>{
+  Message.find({recipient: req.session.curUser.username}, (err, data)=>{
+    let allMessages = data;
+    if (err) {
+      // log for debugging purposes
+      console.log(err.message);
+      // Make sure the page will still render
+      allMessages = [];
+    }
+    let friendRequests = [];
+    let otherMessages = [];
+    allMessages.forEach((m)=>{
+      if (m.isFriendInvite) friendRequests.push(m);
+      else otherMessages.push(m);
+    });
+    res.render('member/inbox.ejs', {
+      user: req.session.curUser,
+      friendRequests: friendRequests,
+      otherMessages: otherMessages,
+      splitMessage: splitMessage
     });
   })
 });
@@ -114,10 +159,14 @@ router.post('/create', (req, res)=>{
     return;
   }
   // Attempt to create the user
-  let newUser = {username: name, password: security.hash(pass)};
+  let newUser = {
+    internalName: name.toLowerCase(),
+    username: name,
+    password: security.hash(pass)
+  };
   let randomAvatar = getAvatar();
   if (randomAvatar != null) newUser.profilePic = randomAvatar;
-  Member.create(newUser, (err, data)=>{
+  Member.create(newUser, (err, newUser)=>{
     if (err) {
       let message = "Account creation was unsuccessful. Please try again later.";
       if (err.code == 11000) {
@@ -133,7 +182,7 @@ router.post('/create', (req, res)=>{
         error: message
       });
     } else {
-      req.session.curUser = data;
+      req.session.curUser = newUser;
       res.redirect(req.baseUrl+'/'+name);
     }
   });
@@ -159,8 +208,8 @@ const updateMemberSettings = (req, res) => {
     req.session.curUser._id,
     update,
     {new: true},
-    (err, data)=>{
-      if (err || !data) {
+    (err, updatedUser)=>{
+      if (err || !updatedUser) {
         // Log it and show the error on the edit page
         if (err) console.log(err.message);
         res.render('member/edit.ejs', {
@@ -170,7 +219,7 @@ const updateMemberSettings = (req, res) => {
         });
       } else {
         // Update the session and show success
-        req.session.curUser = data;
+        req.session.curUser = updatedUser;
         res.render('member/edit.ejs', {
           user: req.session.curUser,
           member: req.session.curUser,
@@ -210,8 +259,8 @@ const updateMemberPassword = (req, res) => {
     req.session.curUser._id,
     update,
     {new: true},
-    (err, data)=>{
-      if (err || !data) {
+    (err, updatedUser)=>{
+      if (err || !updatedUser) {
         // Log it and show the error on the edit page
         if (err) console.log(err.message);
         res.render('member/edit.ejs', {
@@ -221,7 +270,7 @@ const updateMemberPassword = (req, res) => {
         });
       } else {
         // Update the session and show success
-        req.session.curUser = data;
+        req.session.curUser = updatedUser;
         res.render('member/edit.ejs', {
           user: req.session.curUser,
           member: req.session.curUser,
@@ -235,8 +284,8 @@ const updateMemberPassword = (req, res) => {
 // Update basic information (Update route)
 router.patch('/:username', (req, res)=>{
   let name = pageUtils.cleanString(req.params.username);
-  if (req.session.curUser.username != name) {
-    // User is trying to modify someone else
+  if (req.session.curUser.username!=name && !req.session.curUser.isAdmin) {
+    // Non-admin user is trying to modify someone else
     console.log(req.session.curUser.username, 'tried to modify', name);
     res.redirect('back');
   } else {
@@ -254,39 +303,16 @@ router.patch('/:username', (req, res)=>{
   }
 });
 
-// Update password (Update route)
-router.patch('/:username/password', (req, res)=>{
-  let name = pageUtils.cleanString(req.params.username);
-  if (req.session.curUser.username != name) {
-    // User is trying to modify someone else
-    console.log(req.session.curUser.username, 'tried to modify', name);
-    res.redirect('back');
-  } else {
-    // Validate the new password
-    let pass = pageUtils.cleanString(req.body.newPass);
-    let passError = validation.validatePassword(pass);
-    if (passError) {
-      return
-    }
-
-    let updates = {
-      friendsOnly: pageUtils.isChecked(req.body.friendsOnly),
-      bio: pageUtils.cleanString(req.body.bio)
-    };
-  }
-  res.send('Updating member settings');
-});
-
 // Specific member page (Destroy route)
 router.delete('/:username', (req, res)=>{
   let name = pageUtils.cleanString(req.params.username);
-  if (req.session.curUser.username != name) {
-    // User is trying to delete someone else
+  if (req.session.curUser.username!=name && !req.session.curUser.isAdmin) {
+    // Non-admin user is trying to delete someone else
     console.log(req.session.curUser.username, 'tried to delete', name);
     res.redirect('back');
   } else {
     // User is deleting their account
-    Member.findByIdAndRemove(req.session.curUser._id, (err, data)=>{
+    Member.findByIdAndRemove(req.session.curUser._id, (err, removedUser)=>{
       if (err) {
         // Log for debuggin purposes
         console.log(err.message);
@@ -302,41 +328,78 @@ router.delete('/:username', (req, res)=>{
 
 // Specific member page (Show route)
 router.get('/:username', (req, res)=>{
-  let name = pageUtils.cleanString(req.params.username);
-  Member.findOne({username: name}, (err, data)=>{
-    if (err || !data) {
+  let name = pageUtils.cleanString(req.params.username).toLowerCase();
+  Member.findOne({internalName: name}, (err, foundUser)=>{
+    if (err || !foundUser) {
       // Log for debugging purposes
       if (err) console.log(err.message);
       res.redirect(req.baseUrl);
     } else {
       let page = 'member/show.ejs';
-      if (!canSee(data, req.session.curUser)) {
+      if (!canSee(foundUser, req.session.curUser)) {
         // Show the "hidden" user page instead of the actual page
         page = 'member/noshow.ejs';
       }
       res.render(page, {
         user: req.session.curUser,
-        member: data
+        member: foundUser,
+        splitMessage: splitMessage
       });
     }
   });
 });
 
-// Modify member (Edit route)
-router.get('/:username/account', (req, res)=>{
+// Send a user a friend invite
+router.post('/:username/befriend', (req, res)=>{
   let name = pageUtils.cleanString(req.params.username);
-  if (req.session.curUser.username != name) {
-    // User is trying to access someone else's settings
-    console.log(req.session.curUser.username, 'tried to see setting for', name);
-    res.redirect('back');
+  let self = (req.session.curUser.internalName == name.toLowerCase());
+  let blacklisted = (req.session.curUser.blacklist.indexOf(name) != -1);
+  let alreadyFriends = (req.session.curUser.friends.indexOf(name) != -1);
+  if (self || blacklisted || alreadyFriends) {
+    // A friend request can't be sent to this member send them back to the member page
+    res.redirect(req.baseUrl+'/'+name);
   } else {
-    res.render('member/edit.ejs', {
-      user: req.session.curUser,
-      member: req.session.curUser,
-      updateMessage: null
+    Member.findOne({internalName: name.toLowerCase()}, (err1, foundUser)=>{
+      if (err1 || !foundUser) {
+        // Log for debugging purposes
+        if (err1) console.log(err1.message);
+        res.redirect(req.baseUrl);
+      } else {
+        // Create a new friend request
+        let friendRequest = {
+          sender: req.session.curUser.username,
+          recipient: foundUser.username,
+          message: pageUtils.cleanString(req.body.message),
+          isFriendInvite: true
+        };
+        Message.create(friendRequest, (err2, newMessage)=>{
+          if (err2) {
+            // Log error for debugging purposes
+            console.log(err2.message);
+            // Send the user back to the member page
+            res.redirect(req.baseUrl+'/'+foundUser.username);
+          } else {
+            // Modify user to be aware of pending request
+            let update = {$push: {pending: foundUser.username}};
+            Member.findByIdAndUpdate(
+              req.session.curUser._id,
+              update,
+              {new: true},
+              (err3, updatedUser)=>{
+                // Log error for debugging purposes
+                if (err3) console.log(err3.message);
+                // Update the user object on the session
+                if (updatedUser) req.session.curUser = updatedUser;
+                // Send the user back to the member page
+                res.redirect(req.baseUrl+'/'+foundUser.username);
+              }
+            );
+          }
+        });
+      }
     });
   }
-});
+})
 
 // Export the router for use as middleware
 module.exports = router;

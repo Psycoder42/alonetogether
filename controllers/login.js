@@ -15,7 +15,7 @@ const Member = members.getModel(mongoose.connection);
 router.post('/', (req, res)=>{
   let name = pageUtils.cleanString(req.body.username);
   let pass = pageUtils.cleanString(req.body.password);
-  Member.findOne({username: name}, (err, data)=>{
+  Member.findOne({internalName: name.toLowerCase()}, (err, foundUser)=>{
     if (err) {
       // Log error for debugging purposes
       console.log(err.message);
@@ -24,7 +24,7 @@ router.post('/', (req, res)=>{
         isNew: false,
         error: "Log in was unsuccessful. Please try again later."
       });
-    } else if (!data || !security.matchesHash(pass, data.password)) {
+    } else if (!foundUser || !security.matchesHash(pass, foundUser.password)) {
       // Bad password
       res.render('public/login.ejs', {
         user: req.session.curUser,
@@ -35,7 +35,7 @@ router.post('/', (req, res)=>{
       // Destination is either where they tried to get to or their own page
       let dest = req.session.redirectedFrom || '/members/'+name;
       // log them in and send them to their destination
-      req.session.curUser = data;
+      req.session.curUser = foundUser;
       res.redirect(dest);
     }
   });

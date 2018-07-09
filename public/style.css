@@ -245,3 +245,30 @@ input[type="submit"] {
   position: relative;
   cursor: pointer;
 }
+
+.msg-window p {
+  padding: 0;
+  margin: 5px 0;
+}
+
+.msg-window {
+  max-height: 600px;
+  margin-bottom: 10px;
+  overflow-y: auto;
+}
+
+.msg-window input[type="submit"] {
+  margin-top: 5px;
+}
+
+.fr-content, .msg-content {
+  color: black;
+  margin: 5px;
+  padding: 5px;
+  border: 1px solid black;
+  background-color: white;
+}
+
+.fr-content .txt-link, .msg-content .txt-link {
+  color: navy;
+}

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+  <%- include('../partials/head.ejs', { subtitle: ' - Inbox' }); %>
+  </head>
+  <body>
+  <%- include('../partials/header.ejs', { user: user }); %>
+    <main>
+      <div class="flex-col full">
+        <div class="grid-2">
+          <label>Friend Requests:</label>
+          <% if (friendRequests.length == 0) { %>
+            <span class=subtle>No pending friend requests.</span>
+          <% } else { %>
+            <div class="flex-col msg-window">
+            <% for (let request of friendRequests) { %>
+              <div class="request">
+                <div class="flex-row full">
+                  <div class="flex-col fill fr-content">
+                    <h4>From: <a class="txt-link" href="/members/<%= request.sender %>"><%= request.sender %></a></h4>
+                    <h4><%= request.createdAt %></h4>
+                    <div class="text-display">
+                    <% for (let p of splitMessage(request.message)) { %>
+                      <p><%= p %></p>
+                    <% } %>
+                    </div>
+                  </div>
+                  <div class="fr-buttons">
+                    <form action="/message/<%= request._id %>/accept" method="post">
+                      <input type="submit" value="Accept">
+                    </form>
+                    <form action="/message/<%= request._id %>/reject" method="post">
+                      <input type="submit" value="Reject">
+                    </form>
+                    <form action="/members/<%= request.sender %>/blacklist" method="post">
+                      <input type="submit" value="Blacklist">
+                    </form>
+                  </div>
+                </div>
+              </div>
+            <% } %>
+            </div>
+          <% } %>
+          <label>Messages:</label>
+          <% if (otherMessages.length == 0) { %>
+            <span class=subtle>No messages.</span>
+          <% } else { %>
+            <div class="flex-col msg-window">
+            <% for (let message of otherMessages) { %>
+              <div class="message">
+                <div class="flex-row full">
+                  <div class="flex-col fill msg-content">
+                    <h4>From: <a class="txt-link" href="/members/<%= message.sender %>"><%= message.sender %></a></h4>
+                    <h4><%= message.createdAt %></h4>
+                    <div class="text-display">
+                    <% for (let p of splitMessage(message.message)) { %>
+                      <p><%= p %></p>
+                    <% } %>
+                    </div>
+                  </div>
+                  <div class="msg-buttons">
+                    <form action="/message/<%= message._id %>" method="post">
+                      <input type="hidden" name="_method" value="delete">
+                      <input type="submit" value="Accept">
+                    </form>
+                    <form action="/message/<%= message._id %>/reject" method="post">
+                      <input type="submit" value="Reject">
+                    </form>
+                    <form action="/members/<%= request.sender %>/blacklist" method="post">
+                      <input type="submit" value="Blacklist">
+                    </form>
+                  </div>
+                </div>
+              </div>
+            <% } %>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </main>
+  <% include ../partials/footer.ejs %>
+  </body>
+</html>

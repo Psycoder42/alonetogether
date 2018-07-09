@@ -1,9 +1,24 @@
-<% if (user._id!=member._id && member.friends.indexOf(user.username)==-1) { %>
-<p>Why not become friends?</p>
-<form class="flex-col fill friend-request" action="/members/<%= member.username %>/befriend" method="post">
-  <textarea name="message">Hello, would you like to be friends?</textarea>
-  <div class="submit">
-    <input type="submit" value="Send Friend Request">
-  </div>
-</form>
-<% } %>
+<%
+  let self = (user._id == member._id);
+  let blacklisted = (user.blacklist.indexOf(member.username) != -1);
+  let alreadyFriends = (user.friends.indexOf(member.username) != -1);
+  if (!(self || blacklisted || alreadyFriends)) {
+    if (user.pending.indexOf(member.username) != -1) {
+%>
+<div class="flex-col fill friend-request">
+  <p>Friend request sent. Awaiting reply.</p>
+</div>
+<%  } else { %>
+<div class="flex-col fill friend-request">
+  <p>Why not become friends?</p>
+  <form class="flex-col fill" action="/members/<%= member.username %>/befriend" method="post">
+    <textarea name="message">Hello, would you like to be friends?</textarea>
+    <div class="submit">
+      <input type="submit" value="Send Friend Request">
+    </div>
+  </form>
+</div>
+<%
+    }
+  }
+%>

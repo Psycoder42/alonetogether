@@ -2,7 +2,9 @@
 <% if (user) { %>
   <a class="txt-link" href="/members/<%= user.username %>">Profile</a>
   <p class="spacer">|</p>
-  <a class="txt-link" href="/members/<%= user.username %>/account">Settings</a>
+  <a class="txt-link" href="/members/inbox">Inbox</a>
+  <p class="spacer">|</p>
+  <a class="txt-link" href="/members/account">Settings</a>
   <p class="spacer">|</p>
   <form action="/login" method="post">
     <input type="hidden" name="_method" value="delete">
