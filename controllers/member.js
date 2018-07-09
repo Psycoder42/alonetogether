@@ -188,9 +188,15 @@ const updateMemberSettings = async (req, res) => {
       return;
     }
     // Update the user settings and return the usee the edit page
-    let friendsOnly = pageUtils.isChecked(req.body.friendsOnly);
     let bio = pageUtils.cleanString(req.body.bio);
-    let update = {$set: {bio: bio, profilePic: profilePic, friendsOnly: friendsOnly}};
+    let friendsOnly = pageUtils.isChecked(req.body.friendsOnly);
+    let delOnBlacklist = pageUtils.isChecked(req.body.delOnBlacklist);
+    let update = {$set: {
+      bio: bio,
+      profilePic: profilePic,
+      friendsOnly: friendsOnly,
+      delOnBlacklist: delOnBlacklist
+    }};
     curUser = await Member.findByIdAndUpdate(curUser._id, update, {new: true});
     req.session.curUser = curUser;
     // Return to the settings page

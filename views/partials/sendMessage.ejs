@@ -1,0 +1,11 @@
+<%
+  let recipient = (member ? member.username : '');
+  let textType = (member ? 'hidden' : 'text');
+%>
+<form class="flex-col fill send-message" action="/messages" method="post">
+  <input type="<%= textType %>" name="recipient" placeholder="Recipient" value="<%= recipient %>">
+  <textarea name="message" placeholder="Write Something"></textarea>
+  <div class="submit">
+    <input type="submit" value="Send Message">
+  </div>
+</form>

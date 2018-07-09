@@ -5,8 +5,11 @@
   </head>
   <body>
   <%- include('../partials/header.ejs', { user: user }); %>
-    <main>
+    <main class="stretch">
       <div class="flex-col full">
+        <h3 class="center">Compose a Message</h3>
+        <%- include('../partials/sendMessage.ejs', {user: user, member: null}); %>
+        <h3 class="center">Received Messages</h3>
         <div class="grid-2">
           <label>Friend Requests:</label>
           <% if (friendRequests.length == 0) { %>
@@ -63,7 +66,7 @@
                       <input type="hidden" name="_method" value="delete">
                       <input type="submit" value="Accept">
                     </form>
-                    <form action="/members/<%= request.sender %>/blacklist" method="post">
+                    <form action="/members/<%= message.sender %>/blacklist" method="post">
                       <input type="submit" value="Blacklist">
                     </form>
                   </div>

@@ -24,7 +24,7 @@ main {
 
 h1, h2, h3, h4, h5, h6 {
   padding: 0;
-  margin: 0;
+  margin: 5px;
 }
 
 header, footer {
@@ -64,9 +64,13 @@ textarea {
   overflow-y: auto;
 }
 
-.text-display {
-  margin: 10px 0;
-  width: 250px;
+.text-display, .send-message {
+  width: 80%;
+  min-width: 250px;
+}
+
+.send-message {
+  margin: 5px auto;
 }
 
 .flex-col {
@@ -120,7 +124,7 @@ textarea {
   text-align: center;
 }
 
-.friend-request textarea {
+.friend-request textarea, .send-message textarea {
   min-width: 300px;
   min-height: 5em;
 }
@@ -224,26 +228,6 @@ input[type="submit"] {
   font-weight: bold;
 }
 
-.top-float {
-  color: black;
-  position: absolute;
-  font-weight: bold;
-  padding: 0.8em;
-  text-align: center;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1;
-  background-color: rgba(255, 255, 255, 0.6);
-}
-
-#change-avatar {
-  border: 1px solid var(--separator-color);
-  margin: 5px;
-  position: relative;
-  cursor: pointer;
-}
-
 .msg-window p {
   padding: 0;
   margin: 5px 0;
@@ -269,4 +253,24 @@ input[type="submit"] {
 
 .fr-content .txt-link, .msg-content .txt-link {
   color: navy;
+}
+
+.top-float {
+  color: black;
+  position: absolute;
+  font-weight: bold;
+  padding: 0.8em;
+  text-align: center;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  background-color: rgba(255, 255, 255, 0.6);
+}
+
+#change-avatar {
+  border: 1px solid var(--separator-color);
+  margin: 5px;
+  position: relative;
+  cursor: pointer;
 }
