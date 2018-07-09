@@ -36,6 +36,10 @@
                 <input type="checkbox" name="friendsOnly" <%= (user.friendsOnly ? 'checked' : '') %>>
                 <label for="friendsOnly">Only allow friends to view profile.</label>
               </div>
+              <div>
+                <input type="checkbox" name="delOnBlacklist" <%= (user.delOnBlacklist ? 'checked' : '') %>>
+                <label for="delOnBlacklist">Delete all messages sent by member when blacklisting.</label>
+              </div>
             </div>
           </div>
           <div class="submit">

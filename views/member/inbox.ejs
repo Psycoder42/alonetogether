@@ -33,7 +33,6 @@
                       <input type="submit" value="Reject">
                     </form>
                     <form action="/members/<%= request.sender %>/blacklist" method="post">
-                      <input type="hidden" name="_method" value="patch">
                       <input type="submit" value="Blacklist">
                     </form>
                   </div>
@@ -65,7 +64,6 @@
                       <input type="submit" value="Accept">
                     </form>
                     <form action="/members/<%= request.sender %>/blacklist" method="post">
-                      <input type="hidden" name="_method" value="patch">
                       <input type="submit" value="Blacklist">
                     </form>
                   </div>

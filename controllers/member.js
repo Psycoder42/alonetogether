@@ -191,13 +191,13 @@ const updateMemberSettings = async (req, res) => {
     let friendsOnly = pageUtils.isChecked(req.body.friendsOnly);
     let bio = pageUtils.cleanString(req.body.bio);
     let update = {$set: {bio: bio, profilePic: profilePic, friendsOnly: friendsOnly}};
-    let updatedUser = await Member.findByIdAndUpdate(curUser._id, update, {new: true});
-    // Update the session and return to the settings page
-    req.session.curUser = updatedUser;
+    curUser = await Member.findByIdAndUpdate(curUser._id, update, {new: true});
+    req.session.curUser = curUser;
+    // Return to the settings page
     let message = "Profile updated successfully."
     res.render(
       'member/edit.ejs',
-      {user: updatedUser, member: updatedUser, updateMessage: message}
+      {user: curUser, member: curUser, updateMessage: message}
     );
   } catch (err) {
     // Log it and show the error on the edit page
@@ -236,13 +236,13 @@ const updateMemberPassword = async (req, res) => {
     }
     // Update the password and return them to the settings page
     let update = {$set: {password: security.hash(newPass)}};
-    let updatedUser = await Member.findByIdAndUpdate(curUser._id, update, {new: true});
-    // Update the session and return to the settings page
-    req.session.curUser = updatedUser;
+    curUser = await Member.findByIdAndUpdate(curUser._id, update, {new: true});
+    req.session.curUser = curUser;
+    // Return to the settings page
     let message = "Password updated successfully.";
     res.render(
       'member/edit.ejs',
-      {user: updatedUser, member: updatedUser, updateMessage: message}
+      {user: curUser, member: curUser, updateMessage: message}
     );
   } catch (err) {
     // Log it and show the error on the edit page
@@ -279,8 +279,8 @@ router.patch('/:username', (req, res)=>{
 
 // Specific member page (Destroy route)
 router.delete('/:username', async (req, res)=>{
-  let name = pageUtils.cleanString(req.params.username);
   try {
+    let name = pageUtils.cleanString(req.params.username);
     if (req.session.curUser.username!=name && !req.session.curUser.isAdmin) {
       // Non-admin user is trying to delete someone else
       console.log(req.session.curUser.username, 'tried to delete', name);
@@ -294,7 +294,7 @@ router.delete('/:username', async (req, res)=>{
   } catch (err) {
     // Log for debugging purposes
     console.log(err.message);
-    res.redirect(req.baseUrl+'/'+name+'/account');
+    res.redirect(req.baseUrl+'/account');
   }
 });
 
@@ -341,19 +341,21 @@ router.post('/:username/befriend', async (req, res)=>{
         res.redirect(req.baseUrl);
         return;
       }
-      // Create a new friend request
-      let friendRequest = {
-        sender: curUser.username,
-        recipient: foundUser.username,
-        message: pageUtils.cleanString(req.body.message),
-        isFriendInvite: true
-      };
-      let newMessage = await Message.create(friendRequest);
-      // Modify user to be aware of pending request
+      // Modify user to be aware they sent a request
       let update = {$push: {pending: foundUser.username}};
-      let updatedUser = await Member.findByIdAndUpdate(curUser._id, update, {new: true});
-      // Update the session
-      req.session.curUser = updatedUser;
+      curUser = await Member.findByIdAndUpdate(curUser._id, update, {new: true});
+      req.session.curUser = curUser;
+      // Create a new friend request (if the member hasn't blacklisted the user)
+      let allowSend = (foundUser.blacklist.indexOf(curUser.username) == -1);
+      if (allowSend) {
+        let friendRequest = {
+          sender: curUser.username,
+          recipient: foundUser.username,
+          message: pageUtils.cleanString(req.body.message),
+          isFriendInvite: true
+        };
+        let newMessage = await Message.create(friendRequest);
+      }
     }
   } catch (err) {
     // Log for debugging purposes
@@ -361,6 +363,76 @@ router.post('/:username/befriend', async (req, res)=>{
   }
   // Send the user back to the member page
   res.redirect(req.baseUrl+'/'+name);
+});
+
+// Logic for defreinding - returns the updated curUser
+const defriend = async (curUser, member) => {
+  // don't use a try/catch so any errors will propogate up
+  let updatedMember = await Member.findByIdAndUpdate(member._id, {
+    $pull: {friends: curUser.username}
+  });
+  let updatedUser = await Member.findByIdAndUpdate(curUser._id, {
+    $pull: {friends: member.username}
+  });
+  return updatedUser;
+}
+
+// Defriend a member
+router.post('/:username/defriend', async (req, res)=>{
+  try {
+    let curUser = req.session.curUser;
+    let name = pageUtils.cleanString(req.params.username);
+    let areFriends = (curUser.friends.indexOf(name) != -1);
+    if (areFriends) {
+      let foundUser = await Member.findOne({internalName: name.toLowerCase()});
+      if (foundUser) {
+        curUser = defriend(curUser, foundUser);
+        req.session.curUser = curUser;
+      }
+    }
+  } catch (err) {
+    // Log for debugging purposes
+    console.log(err.message);
+  }
+  // Send the user back
+  res.redirect('back');
+});
+
+// Blacklist a member
+router.post('/:username/blacklist', async (req, res)=>{
+  try {
+    let curUser = req.session.curUser;
+    let name = pageUtils.cleanString(req.params.username);
+    let self = (curUser.internalName == name.toLowerCase());
+    let alreadyBlacklisted = (curUser.blacklist.indexOf(name) != -1);
+    if (!(self || alreadyBlacklisted)) {
+      let foundUser = await Member.findOne({internalName: name.toLowerCase()});
+      if (foundUser) {
+        let areFriends = (curUser.friends.indexOf(foundUser.username) != -1);
+        if (areFriends) {
+          // defriend the user before blacklisting
+          curUser = defriend(curUser, foundUser);
+          req.session.curUser = curUser;
+        }
+        // Modify user to know who they've blacklisted
+        let update = {$push: {blacklist: foundUser.username}};
+        curUser = await Member.findByIdAndUpdate(curUser._id, update, {new: true});
+        req.session.curUser = curUser;
+        // Delete any messages sent to user by blacklisted member
+        let toDelete = {sender: foundUser.username, recipient: curUser.username};
+        if (!curUser.delOnBlacklist) {
+          // Only delete the friend requests
+          toDelete.isFriendInvite = true;
+        }
+        let removedMessages = await Message.remove(toDelete);
+      }
+    }
+  } catch (err) {
+    // Log for debugging purposes
+    console.log(err.message);
+  }
+  // Send the user back
+  res.redirect('back');
 });
 
 // Export the router for use as middleware
