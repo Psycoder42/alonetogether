@@ -12,20 +12,13 @@ const security = require('../utils/securityUtils.js');
 const Member = members.getModel(mongoose.connection);
 
 // The actual log in (Create route)
-router.post('/', (req, res)=>{
-  let name = pageUtils.cleanString(req.body.username);
-  let pass = pageUtils.cleanString(req.body.password);
-  Member.findOne({internalName: name.toLowerCase()}, (err, foundUser)=>{
-    if (err) {
-      // Log error for debugging purposes
-      console.log(err.message);
-      res.render('public/login.ejs', {
-        user: req.session.curUser,
-        isNew: false,
-        error: "Log in was unsuccessful. Please try again later."
-      });
-    } else if (!foundUser || !security.matchesHash(pass, foundUser.password)) {
-      // Bad password
+router.post('/', async (req, res)=>{
+  try {
+    let name = pageUtils.cleanString(req.body.username);
+    let pass = pageUtils.cleanString(req.body.password);
+    let foundUser = await Member.findOne({internalName: name.toLowerCase()});
+    if (!foundUser || !security.matchesHash(pass, foundUser.password)) {
+      // Bad username or password
       res.render('public/login.ejs', {
         user: req.session.curUser,
         isNew: false,
@@ -38,7 +31,15 @@ router.post('/', (req, res)=>{
       req.session.curUser = foundUser;
       res.redirect(dest);
     }
-  });
+  } catch (err) {
+    // Log error for debugging purposes
+    console.log(err);
+    res.render('public/login.ejs', {
+      user: req.session.curUser,
+      isNew: false,
+      error: "Log in was unsuccessful. Please try again later."
+    });
+  }
 });
 
 // The actual log out (Destroy route)

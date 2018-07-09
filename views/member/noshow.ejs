@@ -8,7 +8,7 @@
   </head>
   <body>
   <%- include('../partials/header.ejs', { user: user }); %>
-    <main>
+    <main class="stretch">
       <div class="flex-row full">
         <div class="flex-col user-page-left">
           <img class="avatar" src="<%= member.profilePic %>" alt="<%= member.username %>">
@@ -16,7 +16,7 @@
         </div>
         <div class="flex-col fill user-page-right">
           <p>This member currently prefers to be alone.</p>
-        <%- include('../partials/friendRequest.ejs', {user:user, member:member}); %>
+        <%- include('../partials/friendRequest.ejs', {user:user, member:member, inFlight: awaitingReply}); %>
         </div>
       </div>
     </main>

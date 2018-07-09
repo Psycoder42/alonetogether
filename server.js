@@ -19,6 +19,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 app.use((req, res, next) => {
   // Move the _method property from the body to the headers
+  // This hack prevents the url from showing the override parameter
   if (req.body._method) {
     req.headers['x-method-override'] = req.body._method
     delete req.body._method;
@@ -46,6 +47,9 @@ app.use('/admins', adminRoutes);
 // Member routes
 const memberRoutes = require('./controllers/member.js');
 app.use('/members', memberRoutes);
+// Message routes
+const messageRoutes = require('./controllers/message.js');
+app.use('/messages', messageRoutes);
 // Public routes
 const publicRoutes = require('./controllers/public.js');
 app.use('/', publicRoutes);

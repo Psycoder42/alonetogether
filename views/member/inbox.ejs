@@ -26,13 +26,14 @@
                     </div>
                   </div>
                   <div class="fr-buttons">
-                    <form action="/message/<%= request._id %>/accept" method="post">
+                    <form action="/messages/<%= request._id %>/accept" method="post">
                       <input type="submit" value="Accept">
                     </form>
-                    <form action="/message/<%= request._id %>/reject" method="post">
+                    <form action="/messages/<%= request._id %>/reject" method="post">
                       <input type="submit" value="Reject">
                     </form>
                     <form action="/members/<%= request.sender %>/blacklist" method="post">
+                      <input type="hidden" name="_method" value="patch">
                       <input type="submit" value="Blacklist">
                     </form>
                   </div>
@@ -59,14 +60,12 @@
                     </div>
                   </div>
                   <div class="msg-buttons">
-                    <form action="/message/<%= message._id %>" method="post">
+                    <form action="/messages/<%= message._id %>" method="post">
                       <input type="hidden" name="_method" value="delete">
                       <input type="submit" value="Accept">
                     </form>
-                    <form action="/message/<%= message._id %>/reject" method="post">
-                      <input type="submit" value="Reject">
-                    </form>
                     <form action="/members/<%= request.sender %>/blacklist" method="post">
+                      <input type="hidden" name="_method" value="patch">
                       <input type="submit" value="Blacklist">
                     </form>
                   </div>

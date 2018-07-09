@@ -5,8 +5,7 @@ const mongoose = require('mongoose');
 const postSchema = mongoose.Schema({
   author: {type: String, required: true},
   visibility: {type: String, enum: ['all','friends','self'], required: true},
-  content: {type: String, required: true},
-  likes: {type: Number, min: 0, default: 0}
+  content: {type: String, required: true}
 }, {timestamps: true});
 
 // Model exports

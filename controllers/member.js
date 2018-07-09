@@ -77,9 +77,9 @@ router.use(security.authenticated('curUser', '/login', exceptions));
 router.get('/', (req, res)=>{
   Member.find({}, (err, data)=>{
     let allMembers = data;
-    if (err) {
+    if (err || !data) {
       // log for debugging purposes
-      console.log(err.message);
+      if (err) console.log(err.message);
       // Make sure the page will still render
       allMembers = [];
     }
@@ -104,9 +104,9 @@ router.get('/account', (req, res)=>{
 router.get('/inbox', (req, res)=>{
   Message.find({recipient: req.session.curUser.username}, (err, data)=>{
     let allMessages = data;
-    if (err) {
+    if (err || !data) {
       // log for debugging purposes
-      console.log(err.message);
+      if (err) console.log(err.message);
       // Make sure the page will still render
       allMessages = [];
     }
@@ -135,150 +135,124 @@ router.get('/new', (req, res)=>{
 });
 
 // Create the actual user (Create route)
-router.post('/create', (req, res)=>{
-  // Validate the username
-  let name = pageUtils.cleanString(req.body.username);
-  let nameError = validation.validateUsername(name);
-  if (nameError) {
-    res.render('public/login.ejs', {
-      user: req.session.curUser,
-      isNew: true,
-      error: nameError
-    });
-    return;
-  }
-  // Validate the password
-  let pass = pageUtils.cleanString(req.body.password);
-  let passError = validation.validatePassword(pass);
-  if (passError) {
-    res.render('public/login.ejs', {
-      user: req.session.curUser,
-      isNew: true,
-      error: passError
-    });
-    return;
-  }
-  // Attempt to create the user
-  let newUser = {
-    internalName: name.toLowerCase(),
-    username: name,
-    password: security.hash(pass)
-  };
-  let randomAvatar = getAvatar();
-  if (randomAvatar != null) newUser.profilePic = randomAvatar;
-  Member.create(newUser, (err, newUser)=>{
-    if (err) {
-      let message = "Account creation was unsuccessful. Please try again later.";
-      if (err.code == 11000) {
-        // Username already exists
-        message = "Username already in use.";
-      } else {
-        // log the error for debugging purposes
-        console.log(err.message);
-      }
-      res.render('public/login.ejs', {
-        user: req.session.curUser,
-        isNew: true,
-        error: message
-      });
-    } else {
-      req.session.curUser = newUser;
-      res.redirect(req.baseUrl+'/'+name);
+router.post('/create', async (req, res)=>{
+  try {
+    let curUser = req.session.curUser
+    // Validate the username
+    let name = pageUtils.cleanString(req.body.username);
+    let nameError = validation.validateUsername(name);
+    if (nameError) {
+      res.render('public/login.ejs', {user: curUser, isNew: true, error: nameError});
+      return;
     }
-  });
+    // Validate the password
+    let pass = pageUtils.cleanString(req.body.password);
+    let passError = validation.validatePassword(pass);
+    if (passError) {
+      res.render('public/login.ejs', {user: curUser, isNew: true, error: passError});
+      return;
+    }
+    // Attempt to create the user
+    let userInfo = {internalName: name.toLowerCase(), username: name, password: security.hash(pass)};
+    let randomAvatar = getAvatar();
+    if (randomAvatar != null) userInfo.profilePic = randomAvatar;
+    let newUser = await Member.create(userInfo);
+    // Update the session and send the user to their settings page
+    req.session.curUser = newUser;
+    res.redirect(req.baseUrl+'/account');
+  } catch (err) {
+    let message = "Account creation was unsuccessful. Please try again later.";
+    if (err.code == 11000) {
+      // Username already exists
+      message = "Username already in use.";
+    } else {
+      // log the error for debugging purposes
+      console.log(err.message);
+    }
+    res.render('public/login.ejs', {user: curUser, isNew: true, error: message});
+  }
 });
 
 // Logic to update the basic settings
-const updateMemberSettings = (req, res) => {
-  // Validate that the profile pic is one of the available set
-  let profilePic = getSelectedAvatar(pageUtils.cleanString(req.body.profilePic));
-  if (!profilePic) {
-    res.render('member/edit.ejs', {
-      user: req.session.curUser,
-      member: req.session.curUser,
-      updateMessage: 'Unknown avatar selection.'
-    });
-    return;
-  }
-  // Update the user settings and return the usee the edit page
-  let friendsOnly = pageUtils.isChecked(req.body.friendsOnly);
-  let bio = pageUtils.cleanString(req.body.bio);
-  let update = {$set: {bio: bio, profilePic: profilePic, friendsOnly: friendsOnly}};
-  Member.findByIdAndUpdate(
-    req.session.curUser._id,
-    update,
-    {new: true},
-    (err, updatedUser)=>{
-      if (err || !updatedUser) {
-        // Log it and show the error on the edit page
-        if (err) console.log(err.message);
-        res.render('member/edit.ejs', {
-          user: req.session.curUser,
-          member: req.session.curUser,
-          updateMessage: "Update failed. Please try again later."
-        });
-      } else {
-        // Update the session and show success
-        req.session.curUser = updatedUser;
-        res.render('member/edit.ejs', {
-          user: req.session.curUser,
-          member: req.session.curUser,
-          updateMessage: "Profile updated successfully."
-        });
-      }
+const updateMemberSettings = async (req, res) => {
+  try {
+    let curUser = req.session.curUser;
+    // Validate that the profile pic is one of the available set
+    let profilePic = getSelectedAvatar(pageUtils.cleanString(req.body.profilePic));
+    if (!profilePic) {
+      let message = 'Unknown avatar selection.';
+      res.render(
+        'member/edit.ejs',
+        {user: curUser, member: curUser, updateMessage: message}
+      );
+      return;
     }
-  );
+    // Update the user settings and return the usee the edit page
+    let friendsOnly = pageUtils.isChecked(req.body.friendsOnly);
+    let bio = pageUtils.cleanString(req.body.bio);
+    let update = {$set: {bio: bio, profilePic: profilePic, friendsOnly: friendsOnly}};
+    let updatedUser = await Member.findByIdAndUpdate(curUser._id, update, {new: true});
+    // Update the session and return to the settings page
+    req.session.curUser = updatedUser;
+    let message = "Profile updated successfully."
+    res.render(
+      'member/edit.ejs',
+      {user: updatedUser, member: updatedUser, updateMessage: message}
+    );
+  } catch (err) {
+    // Log it and show the error on the edit page
+    console.log(err.message);
+    let message = "Update failed. Please try again later.";
+    res.render(
+      'member/edit.ejs',
+      {user: curUser, member: curUser, updateMessage: message}
+    );
+  }
 }
 
 // Logic to update the member password
-const updateMemberPassword = (req, res) => {
-  // Validate they are the correct user
-  let curPass = pageUtils.cleanString(req.body.currentPass);
-  if (!security.matchesHash(curPass, req.session.curUser.password)) {
-    res.render('member/edit.ejs', {
-      user: req.session.curUser,
-      member: req.session.curUser,
-      updateMessage: 'Incorrect current password.'
-    });
-    return;
-  }
-  // Validate the new password
-  let newPass = pageUtils.cleanString(req.body.newPass);
-  let passError = validation.validatePassword(newPass);
-  if (passError) {
-    res.render('member/edit.ejs', {
-      user: req.session.curUser,
-      member: req.session.curUser,
-      updateMessage: passError
-    });
-    return
-  }
-  // Update the password and return them to the settings page
-  let update = {$set: {password: security.hash(newPass)}};
-  Member.findByIdAndUpdate(
-    req.session.curUser._id,
-    update,
-    {new: true},
-    (err, updatedUser)=>{
-      if (err || !updatedUser) {
-        // Log it and show the error on the edit page
-        if (err) console.log(err.message);
-        res.render('member/edit.ejs', {
-          user: req.session.curUser,
-          member: req.session.curUser,
-          updateMessage: "Update failed. Please try again later."
-        });
-      } else {
-        // Update the session and show success
-        req.session.curUser = updatedUser;
-        res.render('member/edit.ejs', {
-          user: req.session.curUser,
-          member: req.session.curUser,
-          updateMessage: "Password updated successfully."
-        });
-      }
+const updateMemberPassword = async (req, res) => {
+  try {
+    let curUser = req.session.curUser;
+    // Validate they are the correct user
+    let curPass = pageUtils.cleanString(req.body.currentPass);
+    if (!security.matchesHash(curPass, req.session.curUser.password)) {
+      let message = 'Incorrect current password.';
+      res.render(
+        'member/edit.ejs',
+        {user: curUser, member: curUser, updateMessage: message}
+      );
+      return;
     }
-  );
+    // Validate the new password
+    let newPass = pageUtils.cleanString(req.body.newPass);
+    let passError = validation.validatePassword(newPass);
+    if (passError) {
+      res.render(
+        'member/edit.ejs',
+        {user: curUser, member: curUser, updateMessage: passError}
+      );
+      return
+    }
+    // Update the password and return them to the settings page
+    let update = {$set: {password: security.hash(newPass)}};
+    let updatedUser = await Member.findByIdAndUpdate(curUser._id, update, {new: true});
+    // Update the session and return to the settings page
+    req.session.curUser = updatedUser;
+    let message = "Password updated successfully.";
+    res.render(
+      'member/edit.ejs',
+      {user: updatedUser, member: updatedUser, updateMessage: message}
+    );
+  } catch (err) {
+    // Log it and show the error on the edit page
+    console.log(err.message);
+    let message = "Update failed. Please try again later.";
+    res.render(
+      'member/edit.ejs',
+      {user: curUser, member: curUser, updateMessage: message}
+    );
+  }
 }
 
 // Update basic information (Update route)
@@ -304,102 +278,90 @@ router.patch('/:username', (req, res)=>{
 });
 
 // Specific member page (Destroy route)
-router.delete('/:username', (req, res)=>{
+router.delete('/:username', async (req, res)=>{
   let name = pageUtils.cleanString(req.params.username);
-  if (req.session.curUser.username!=name && !req.session.curUser.isAdmin) {
-    // Non-admin user is trying to delete someone else
-    console.log(req.session.curUser.username, 'tried to delete', name);
-    res.redirect('back');
-  } else {
-    // User is deleting their account
-    Member.findByIdAndRemove(req.session.curUser._id, (err, removedUser)=>{
-      if (err) {
-        // Log for debuggin purposes
-        console.log(err.message);
-        res.redirect(req.baseUrl+'/'+name);
-      } else {
-        // Log the now deleted user out and redirect to main landing page
-        req.session.curUser = null;
-        res.redirect('/');
-      }
-    });
+  try {
+    if (req.session.curUser.username!=name && !req.session.curUser.isAdmin) {
+      // Non-admin user is trying to delete someone else
+      console.log(req.session.curUser.username, 'tried to delete', name);
+      res.redirect('back');
+    } else {
+      let removedUser = await Member.findByIdAndRemove(req.session.curUser._id);
+      // Log the now deleted user out and redirect to main landing page
+      req.session.curUser = null;
+      res.redirect('/');
+    }
+  } catch (err) {
+    // Log for debugging purposes
+    console.log(err.message);
+    res.redirect(req.baseUrl+'/'+name+'/account');
   }
 });
 
 // Specific member page (Show route)
-router.get('/:username', (req, res)=>{
-  let name = pageUtils.cleanString(req.params.username).toLowerCase();
-  Member.findOne({internalName: name}, (err, foundUser)=>{
-    if (err || !foundUser) {
-      // Log for debugging purposes
-      if (err) console.log(err.message);
+router.get('/:username', async (req, res)=>{
+  try {
+    let curUser = req.session.curUser;
+    let name = pageUtils.cleanString(req.params.username).toLowerCase();
+    let foundUser = await Member.findOne({internalName: name});
+    if (!foundUser) {
+      // Was a bogus user name, redirect back to the member index
       res.redirect(req.baseUrl);
     } else {
-      let page = 'member/show.ejs';
-      if (!canSee(foundUser, req.session.curUser)) {
-        // Show the "hidden" user page instead of the actual page
-        page = 'member/noshow.ejs';
-      }
-      res.render(page, {
-        user: req.session.curUser,
-        member: foundUser,
-        splitMessage: splitMessage
-      });
+      // Check to see if the member has sent the user a friend request
+      let criteria = {sender: foundUser.username, recipient: curUser.username, isFriendInvite: true};
+      let friendRequest = await Message.findOne(criteria);
+      let frExists = (friendRequest ? true : false);
+      // Switch which page is shown based on user settings/relation
+      res.render(
+        (canSee(foundUser, curUser) ? 'member/show.ejs' : 'member/noshow.ejs'),
+        {user: curUser, member: foundUser, awaitingReply: frExists, splitMessage: splitMessage}
+      );
     }
-  });
+  } catch (err) {
+    // Log for debugging purposes
+    console.log(err.message);
+    res.redirect(req.baseUrl);
+  }
 });
 
 // Send a user a friend invite
-router.post('/:username/befriend', (req, res)=>{
+router.post('/:username/befriend', async (req, res)=>{
   let name = pageUtils.cleanString(req.params.username);
-  let self = (req.session.curUser.internalName == name.toLowerCase());
-  let blacklisted = (req.session.curUser.blacklist.indexOf(name) != -1);
-  let alreadyFriends = (req.session.curUser.friends.indexOf(name) != -1);
-  if (self || blacklisted || alreadyFriends) {
-    // A friend request can't be sent to this member send them back to the member page
-    res.redirect(req.baseUrl+'/'+name);
-  } else {
-    Member.findOne({internalName: name.toLowerCase()}, (err1, foundUser)=>{
-      if (err1 || !foundUser) {
-        // Log for debugging purposes
-        if (err1) console.log(err1.message);
+  try {
+    let curUser = req.session.curUser;
+    let self = (curUser.internalName == name.toLowerCase());
+    let blacklisted = (curUser.blacklist.indexOf(name) != -1);
+    let alreadyFriends = (curUser.friends.indexOf(name) != -1);
+    if (!(self || blacklisted || alreadyFriends)) {
+      // Find the member
+      let foundUser = await Member.findOne({internalName: name.toLowerCase()});
+      if (!foundUser) {
+        // Member doesn't exist - send user to members page
         res.redirect(req.baseUrl);
-      } else {
-        // Create a new friend request
-        let friendRequest = {
-          sender: req.session.curUser.username,
-          recipient: foundUser.username,
-          message: pageUtils.cleanString(req.body.message),
-          isFriendInvite: true
-        };
-        Message.create(friendRequest, (err2, newMessage)=>{
-          if (err2) {
-            // Log error for debugging purposes
-            console.log(err2.message);
-            // Send the user back to the member page
-            res.redirect(req.baseUrl+'/'+foundUser.username);
-          } else {
-            // Modify user to be aware of pending request
-            let update = {$push: {pending: foundUser.username}};
-            Member.findByIdAndUpdate(
-              req.session.curUser._id,
-              update,
-              {new: true},
-              (err3, updatedUser)=>{
-                // Log error for debugging purposes
-                if (err3) console.log(err3.message);
-                // Update the user object on the session
-                if (updatedUser) req.session.curUser = updatedUser;
-                // Send the user back to the member page
-                res.redirect(req.baseUrl+'/'+foundUser.username);
-              }
-            );
-          }
-        });
+        return;
       }
-    });
+      // Create a new friend request
+      let friendRequest = {
+        sender: curUser.username,
+        recipient: foundUser.username,
+        message: pageUtils.cleanString(req.body.message),
+        isFriendInvite: true
+      };
+      let newMessage = await Message.create(friendRequest);
+      // Modify user to be aware of pending request
+      let update = {$push: {pending: foundUser.username}};
+      let updatedUser = await Member.findByIdAndUpdate(curUser._id, update, {new: true});
+      // Update the session
+      req.session.curUser = updatedUser;
+    }
+  } catch (err) {
+    // Log for debugging purposes
+    console.log(err.message);
   }
-})
+  // Send the user back to the member page
+  res.redirect(req.baseUrl+'/'+name);
+});
 
 // Export the router for use as middleware
 module.exports = router;
