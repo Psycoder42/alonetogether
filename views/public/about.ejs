@@ -6,13 +6,39 @@
   <body>
   <%- include('../partials/header.ejs', { user: user }); %>
     <main>
-      <div>
-        Avatars made by
-        <a class="txt-link" href="http://www.freepik.com" title="Freepik">Freepik</a>
-        from
-        <a class="txt-link" href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>
-        licensed under
-        <a class="txt-link" href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC BY 3.0</a>
+      <div class="fill-most">
+        <div>
+          <h2 class="center">About the Site</h2>
+          <p>
+            This site was made as a project for a web development course. The goal
+            of the project was to create a web page that made use of both frontend
+            (HTML, CSS, jQuery) and backend (NodeJS, MongoDB) technologies. I did
+            my best to make the site as functional as possible but keep in mind, it
+            was created in a week buy someone learning the material. Your milage may
+            vary.
+          </p>
+        </div>
+        <div>
+          <h2 class="center">About the Programmer</h2>
+          <p>
+            As the lower corner of the page indicates, I go by the name Psycoder
+            (sometimes - and this is one of those times). I am a Computer Science
+            major who is in the middle of learning some new web stack development
+            skills. I spend most of my day in front of some screen or another and
+            do not eat healthy foods most of the time.
+          </p>
+        </div>
+        <div class="flex-col full center">
+          <h2>Attributions</h2>
+          <p>
+            Avatars made by
+            <a class="txt-link" href="http://www.freepik.com" title="Freepik">Freepik</a>
+            from
+            <a class="txt-link" href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>
+            licensed under
+            <a class="txt-link" href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC BY 3.0</a>
+          </p>
+        </div>
       </div>
     </main>
   <% include ../partials/footer.ejs %>

@@ -8,6 +8,12 @@
   --separator-color: royalblue;
   --post-color: mediumblue;
   --popup-background-color: midnightblue;
+  --hover-highlight-color: white;
+  --message-background-color: white;
+  --message-border-color: black;
+  --alone-blind-color: rgba(0, 0, 0, 0.2);
+  --together-background-color: rgba(225, 225, 255, 0.2);
+  --floating-background-color: rgba(255, 255, 255, 0.6);
 }
 
 html {
@@ -75,7 +81,7 @@ textarea {
   outline: none;
 }
 
-.text-display, .send-message, .friend-request, .make-post {
+.text-display, .send-message, .friend-request, .make-post, .fill-most {
   width: 80%;
   min-width: 250px;
 }
@@ -220,7 +226,7 @@ input[type="submit"] {
 }
 
 .member.together {
-  background-color: rgba(225, 225, 255, 0.2);
+  background-color: var(--together-background-color);
 }
 
 .alone-blind {
@@ -230,7 +236,7 @@ input[type="submit"] {
   right: 0;
   bottom: 0;
   z-index: 1;
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: var(--alone-blind-color);
 }
 
 .user-post {
@@ -297,8 +303,8 @@ input[type="submit"] {
   color: black;
   margin: 5px;
   padding: 5px;
-  border: 1px solid black;
-  background-color: white;
+  border: 1px solid var(--message-border-color);
+  background-color: var(--message-background-color);
 }
 
 .fr-content .txt-link, .msg-content .txt-link {
@@ -327,7 +333,25 @@ input[type="submit"] {
   left: 0;
   right: 0;
   z-index: 1;
-  background-color: rgba(255, 255, 255, 0.6);
+  background-color: var(--floating-background-color);
+}
+
+#avatar-list {
+  margin: 5px 0;
+  max-width: 620px;
+  align-self: center;
+}
+
+.avatar-option {
+  padding: 5px;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.avatar-option:hover {
+  border-color: var(--hover-highlight-color);
 }
 
 #change-avatar {

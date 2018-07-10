@@ -12,7 +12,7 @@
     </script>
     <script type="text/javascript" src="/validation.js"></script>
     <script type="text/javascript" src="/inputChecker.js"></script>
-    <script type="text/javascript" src="/picselect.js"></script>
+    <script type="text/javascript" src="/popups.js"></script>
   </head>
   <body>
   <%- include('../partials/header.ejs', { user: user }); %>
@@ -126,7 +126,7 @@
     </div>
   </main>
   <div id="modal" class="flex-col hidden">
-    <div class="flex-col popup hidden">
+    <div class="flex-col popup pick-avatar hidden">
       <button type="button" class="close-popup txt-button">close</button>
       <div id="avatar-list" class="flex-row wrap">
       <% for (let src of allAvatars) { %>
