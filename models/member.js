@@ -8,7 +8,7 @@ const memberSchema = mongoose.Schema({
   password: {type: String, required: true},
   isAdmin: {type: Boolean, default: false},
   friendsOnly: {type: Boolean, default: false},
-  delOnBlacklist: {type: Boolean, default: false},
+  delOnBlacklist: {type: Boolean, default: true},
   profilePic: String,
   bio: String,
   blacklist: [String],

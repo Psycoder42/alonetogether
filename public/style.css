@@ -6,6 +6,7 @@
   --attention-text-color: orange;
   --background-color: navy;
   --separator-color: royalblue;
+  --post-color: mediumblue;
 }
 
 html {
@@ -130,6 +131,11 @@ textarea {
   text-align: center;
 }
 
+.friends > * {
+  display: block;
+  margin-bottom: .5em;
+}
+
 .friend-request-msg, .center {
   text-align: center;
 }
@@ -226,8 +232,20 @@ input[type="submit"] {
   align-self: stretch;
   position: relative;
   margin: 15px;
+  text-align: left;
+  background-color: var(--post-color);
   border: 1px solid var(--separator-color);
   box-shadow: 2px 2px 10px var(--separator-color);
+}
+
+.post-display {
+  padding: 10px;
+  padding-bottom: 0;
+}
+
+.post-display > p {
+  margin: 0;
+  margin-bottom: 10px;
 }
 
 .actions {
@@ -295,7 +313,7 @@ input[type="submit"] {
 }
 
 .popup {
-  display: none;
+  /* display: none; */
   margin: 10%;
   padding: 2em 0;
   background-color: midnightblue;

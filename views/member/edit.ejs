@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <%
-  let subtitle = ' - Member - ' + member.username + ' - Settings';
-  let imgSrc = (member.username ? member.username : '/images/anon.svg');
+  let subtitle = ' - Member - ' + user.username + ' - Settings';
 %>
   <head>
   <%- include('../partials/head.ejs', { subtitle: subtitle }); %>
@@ -26,8 +25,8 @@
           <div class="flex-row stretch">
             <div id="change-avatar">
               <div class="top-float">Click to Change</div>
-              <img class="avatar" src="<%= member.profilePic %>" alt="<%= member.username %>">
-              <input type="hidden" name="profilePic" value="<%= member.profilePic %>">
+              <img class="avatar" src="<%= user.profilePic %>" alt="<%= user.username %>">
+              <input type="hidden" name="profilePic" value="<%= user.profilePic %>">
             </div>
             <div class="flex-col fill">
               <label for="bio">Biography:</label>
@@ -47,6 +46,48 @@
           </div>
         </fieldset>
       </form>
+      <%_ if (user.friends.length > 0) { -%>
+      <form class="flex-col" action="/members/<%= user.username %>" method="post">
+        <input type="hidden" name="_method" value="patch">
+        <input type="hidden" name="toUpdate" value="friends">
+        <fieldset>
+          <legend>Manage Friends</legend>
+          <div id="all-friends" class="checkbox-list">
+            <%_ for (let i=0; i<user.friends.length; i++) { -%>
+            <div>
+              <%_ let friend = user.friends[i]; -%>
+              <input type="checkbox" name="friend_<%= i %>" value="<%= friend %>">
+              <label for="friend_<%= i %>"><%= friend %></label>
+            </div>
+            <%_ } -%>
+          </div>
+          <div class="submit">
+            <input id="clean-friends" class="button" type="submit" value="End Friendship" disabled>
+          </div>
+        </fieldset>
+      </form>
+      <%_ } -%>
+      <%_ if (user.blacklist.length > 0) { -%>
+      <form class="flex-col" action="/members/<%= user.username %>" method="post">
+        <input type="hidden" name="_method" value="patch">
+        <input type="hidden" name="toUpdate" value="blacklist">
+        <fieldset>
+          <legend>Manage Blacklist</legend>
+          <div id="all-blacklist" class="checkbox-list">
+            <%_ for (let i=0; i<user.blacklist.length; i++) { -%>
+            <div>
+              <%_ let blacklisted = user.blacklist[i]; -%>
+              <input type="checkbox" name="blocked_<%= i %>" value="<%= blacklisted %>">
+              <label for="blocked_<%= i %>"><%= blacklisted %></label>
+            </div>
+            <%_ } -%>
+          </div>
+          <div class="submit">
+            <input id="clean-blacklist" class="button" type="submit" value="Remove From Blacklist" disabled>
+          </div>
+        </fieldset>
+      </form>
+      <%_ } -%>
       <form class="flex-col" action="/members/<%= user.username %>" method="post">
         <input type="hidden" name="_method" value="patch">
         <input type="hidden" name="toUpdate" value="password">

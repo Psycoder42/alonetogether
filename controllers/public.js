@@ -9,6 +9,13 @@ router.get('/', (req, res)=>{
   });
 });
 
+// Legal indemnification
+router.get('/legal', (req, res)=>{
+  res.render('public/legal.ejs', {
+    user: req.session.curUser
+  });
+});
+
 // Information about the website
 router.get('/about', (req, res)=>{
   res.render('public/about.ejs', {

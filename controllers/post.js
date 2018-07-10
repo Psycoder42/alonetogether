@@ -16,7 +16,7 @@ const parsePostObj = (curUser, formData) => {
   let postObj = {
     author: curUser.username,
     visibility: pageUtils.cleanString(formData.scope).toLowerCase(),
-    content: pageUtils.cleanString(formData.content).toLowerCase()
+    content: pageUtils.cleanString(formData.content)
   };
   // Return null if the data is bad
   if (!postObj.content || !posts.validScope(postObj.visibility)) {

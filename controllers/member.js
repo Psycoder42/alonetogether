@@ -175,114 +175,161 @@ router.post('/create', async (req, res)=>{
   }
 });
 
+// Logic for defreinding - returns the updated curUser
+const defriend = async (curUser, usernames) => {
+  // don't use a try/catch so any errors will propogate up
+  if (usernames.length == 0) {
+    return "No friends selected to remove.";
+  }
+  let findList = [];
+  for (let name of usernames) {
+    findList.push(name.toLowerCase());
+  }
+  await Member.update(
+    {internalName: {$in: findList}},
+    {$pull: {friends: curUser.username}},
+    {multi: true}
+  );
+  return await Member.findByIdAndUpdate(
+    curUser._id,
+    {$pullAll: {friends: usernames}},
+    {new: true, multi: true}
+  );
+}
+
 // Logic to update the basic settings
 const updateMemberSettings = async (req, res) => {
-  try {
-    let curUser = req.session.curUser;
-    // Validate that the profile pic is one of the available set
-    let profilePic = getSelectedAvatar(pageUtils.cleanString(req.body.profilePic));
-    if (!profilePic) {
-      let message = 'Unknown avatar selection.';
-      res.render(
-        'member/edit.ejs',
-        {user: curUser, member: curUser, updateMessage: message}
-      );
-      return;
-    }
-    // Update the user settings and return the usee the edit page
-    let bio = pageUtils.cleanString(req.body.bio);
-    let friendsOnly = pageUtils.isChecked(req.body.friendsOnly);
-    let delOnBlacklist = pageUtils.isChecked(req.body.delOnBlacklist);
-    let update = {$set: {
-      bio: bio,
-      profilePic: profilePic,
-      friendsOnly: friendsOnly,
-      delOnBlacklist: delOnBlacklist
-    }};
-    curUser = await Member.findByIdAndUpdate(curUser._id, update, {new: true});
-    req.session.curUser = curUser;
-    // Return to the settings page
-    let message = "Profile updated successfully."
-    res.render(
-      'member/edit.ejs',
-      {user: curUser, member: curUser, updateMessage: message}
-    );
-  } catch (err) {
-    // Log it and show the error on the edit page
-    console.log(err.message);
-    let message = "Update failed. Please try again later.";
-    res.render(
-      'member/edit.ejs',
-      {user: curUser, member: curUser, updateMessage: message}
-    );
+  // Validate that the profile pic is one of the available set
+  let profilePic = getSelectedAvatar(pageUtils.cleanString(req.body.profilePic));
+  if (!profilePic) {
+    return 'Unknown avatar selection.';
   }
+  // Update the user settings and session
+  let bio = pageUtils.cleanString(req.body.bio);
+  let friendsOnly = pageUtils.isChecked(req.body.friendsOnly);
+  let delOnBlacklist = pageUtils.isChecked(req.body.delOnBlacklist);
+  let update = {$set: {
+    bio: bio,
+    profilePic: profilePic,
+    friendsOnly: friendsOnly,
+    delOnBlacklist: delOnBlacklist
+  }};
+  let curUser = req.session.curUser;
+  req.session.curUser = await Member.findByIdAndUpdate(curUser._id, update, {new: true});
+  // Return success message
+  return "Profile updated successfully.";
 }
 
 // Logic to update the member password
 const updateMemberPassword = async (req, res) => {
+  let curUser = req.session.curUser;
+  // Validate they are the correct user
+  let curPass = pageUtils.cleanString(req.body.currentPass);
+  if (!security.matchesHash(curPass, req.session.curUser.password)) {
+    return 'Incorrect current password.';
+  }
+  // Validate the new password
+  let newPass = pageUtils.cleanString(req.body.newPass);
+  let passError = validation.validatePassword(newPass);
+  if (passError) {
+    return passError;
+  }
+  // Update the password and session
+  let update = {$set: {password: security.hash(newPass)}};
+  req.session.curUser = await Member.findByIdAndUpdate(curUser._id, update, {new: true});
+  // Return success message
+  return 'Password updated successfully';
+}
+
+// Logic to update a member's friends
+const updateFriends = async (req, res) => {
+  let toDefriend = [];
+  let prefix = 'friend_';
+  for (let key of Object.keys(req.body)) {
+    if (key.startsWith(prefix)) {
+        toDefriend.push(req.body[key]);
+    }
+  }
+  if (toDefriend.length == 0) {
+    return 'No friends selected to remove';
+  }
+  // Do the defriending and update the session
+  let curUser = req.session.curUser;
+  req.session.curUser = await defriend(curUser, toDefriend);
+  // Return success message
+  return 'Friends updated successfully';
+}
+
+// Logic to update a member's blacklist
+const updateBlacklist = async (req, res) => {
+  let toUnblacklist = [];
+  let prefix = 'blocked_';
+  for (let key of Object.keys(req.body)) {
+    if (key.startsWith(prefix)) {
+        toUnblacklist.push(req.body[key]);
+    }
+  }
+  if (toUnblacklist.length == 0) {
+    return 'No friends selected to remove';
+  }
+  // Manage the blacklist entries
+  let curUser = req.session.curUser;
+  req.session.curUser = await Member.findByIdAndUpdate(
+    curUser._id,
+    {$pullAll: {blacklist: toUnblacklist}},
+    {new: true}
+  );
+  // Return success message
+  return 'Blacklist updated successfully';
+}
+
+// Logic to update a member's blacklist
+const updateSettings = async (req, res, callback) => {
+  let message = "Update failed. Please try again later.";
   try {
-    let curUser = req.session.curUser;
-    // Validate they are the correct user
-    let curPass = pageUtils.cleanString(req.body.currentPass);
-    if (!security.matchesHash(curPass, req.session.curUser.password)) {
-      let message = 'Incorrect current password.';
-      res.render(
-        'member/edit.ejs',
-        {user: curUser, member: curUser, updateMessage: message}
-      );
-      return;
-    }
-    // Validate the new password
-    let newPass = pageUtils.cleanString(req.body.newPass);
-    let passError = validation.validatePassword(newPass);
-    if (passError) {
-      res.render(
-        'member/edit.ejs',
-        {user: curUser, member: curUser, updateMessage: passError}
-      );
-      return
-    }
-    // Update the password and return them to the settings page
-    let update = {$set: {password: security.hash(newPass)}};
-    curUser = await Member.findByIdAndUpdate(curUser._id, update, {new: true});
-    req.session.curUser = curUser;
-    // Return to the settings page
-    let message = "Password updated successfully.";
-    res.render(
-      'member/edit.ejs',
-      {user: curUser, member: curUser, updateMessage: message}
-    );
+    message = await callback(req, res);
   } catch (err) {
     // Log it and show the error on the edit page
     console.log(err.message);
-    let message = "Update failed. Please try again later.";
-    res.render(
-      'member/edit.ejs',
-      {user: curUser, member: curUser, updateMessage: message}
-    );
   }
+  // Return to the settings page
+  res.render(
+    'member/edit.ejs',
+    {user: req.session.curUser, member: req.session.curUser, updateMessage: message}
+  );
 }
 
 // Update basic information (Update route)
-router.patch('/:username', (req, res)=>{
-  let curUser = req.session.curUser;
-  let name = pageUtils.cleanString(req.params.username);
-  if (curUser.username!=name && !curUser.isAdmin) {
-    // Non-admin user is trying to modify someone else
-    console.log(curUser.username, 'tried to modify', name);
-    res.redirect('back');
-  } else {
-    if (req.body.toUpdate == 'settings') {
-      updateMemberSettings(req, res);
-    } else if (req.body.toUpdate == 'password') {
-      updateMemberPassword(req, res);
+router.patch('/:username', async (req, res)=>{
+  try {
+    let curUser = req.session.curUser;
+    let name = pageUtils.cleanString(req.params.username);
+    if (curUser.username!=name && !curUser.isAdmin) {
+      // Non-admin user is trying to modify someone else
+      console.log(curUser.username, 'tried to modify', name);
+      res.redirect('back');
     } else {
-      res.render('member/edit.ejs', {
-        user: curUser,
-        member: curUser,
-        updateMessage: 'Unknown form submission.'
-      });
+      if (req.body.toUpdate == 'settings') {
+        await updateSettings(req, res, updateMemberSettings);
+      } else if (req.body.toUpdate == 'password') {
+        await updateSettings(req, res, updateMemberPassword);
+      }  else if (req.body.toUpdate == 'friends') {
+        await updateSettings(req, res, updateFriends);
+      }  else if (req.body.toUpdate == 'blacklist') {
+        await updateSettings(req, res, updateBlacklist);
+      } else {
+        res.render('member/edit.ejs', {
+          user: curUser,
+          member: curUser,
+          updateMessage: 'Unknown form submission.'
+        });
+      }
     }
+  } catch (err) {
+    // Log for debugging purposes
+    console.log(err.message);
+    // Send them back
+    res.redirect('back');
   }
 });
 
@@ -351,7 +398,7 @@ const renderUserPage = async (req, res, name, post=null) => {
 router.get('/:username', async (req, res)=>{
   try {
     let name = pageUtils.cleanString(req.params.username);
-    renderUserPage(req, res, name);
+    await renderUserPage(req, res, name);
   } catch (err) {
     // Log for debugging purposes
     console.log(err.message);
@@ -370,7 +417,7 @@ router.post('/:username', async (req, res)=>{
       // bogus post id, send them back
       res.redirect('back');
     } else {
-      renderUserPage(req, res, name, foundPost);
+      await renderUserPage(req, res, name, foundPost);
     }
   } catch (err) {
     // Log for debugging purposes
@@ -443,17 +490,6 @@ router.post('/:username/befriend', async (req, res)=>{
   res.redirect(req.baseUrl+'/'+name);
 });
 
-// Logic for defreinding - returns the updated curUser
-const defriend = async (curUser, member) => {
-  // don't use a try/catch so any errors will propogate up
-  await Member.findByIdAndUpdate(member._id, {
-    $pull: {friends: curUser.username}
-  });
-  return await Member.findByIdAndUpdate(curUser._id, {
-    $pull: {friends: member.username}
-  });
-}
-
 // Defriend a member
 router.post('/:username/defriend', async (req, res)=>{
   try {
@@ -461,11 +497,8 @@ router.post('/:username/defriend', async (req, res)=>{
     let name = pageUtils.cleanString(req.params.username);
     let areFriends = (curUser.friends.indexOf(name) != -1);
     if (areFriends) {
-      let foundUser = await Member.findOne({internalName: name.toLowerCase()});
-      if (foundUser) {
-        curUser = defriend(curUser, foundUser);
-        req.session.curUser = curUser;
-      }
+      curUser = defriend(curUser, [foundUser.username]);
+      req.session.curUser = curUser;
     }
   } catch (err) {
     // Log for debugging purposes

@@ -22,11 +22,12 @@ module.exports.getPostQuery = (member, curUser) => {
   let query = {author: member.username};
   if (member._id.toString() != curUser._id.toString()) {
     // Not self so we need to limit some more
-    if (member.friends.indexOf(curUser.username) == -1) {
+    if (!curUser.isAdmin && member.friends.indexOf(curUser.username)==-1) {
       // Not friends only return the public posts
       query.visibility = 'all';
     } else {
       // Friends so just don't show the self posts
+      // Admins can also see posts that are scoped outside 'self'
       query.visibility = {$ne: 'self'};
     }
   }

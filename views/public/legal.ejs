@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+  <%- include('../partials/head.ejs', { subtitle: 'About' }); %>
+  </head>
+  <body>
+  <%- include('../partials/header.ejs', { user: user }); %>
+    <main>
+      <h2>Legal Disclaimer</h2>
+      <p>
+        Use of this site is provided as-is. Neither the creator nor the hositing
+        site can be held liable for any loss or damage incurred as a result of
+        visiting or using this site.
+      </p>
+      <p>
+        While the owners and operators of this site will not use any data provided
+        by users for any purpose other than for the functioning of this site, there
+        is no guarantee that any provided data, including user passwords, will remain
+        secure and within the confines of this site.
+      </p>
+      <p>
+        Creation of an account on this site is free and without restriction. However,
+        admin members of the site have the authority to modify or delete content,
+        including but not limited to posts and messages, as well as delete user
+        accounts. The admin member decision to modify or delete content or accounts
+        is final and does not require notification of the originator of the the
+        modified or deleted content.
+      </p>
+    </main>
+  <% include ../partials/footer.ejs %>
+  </body>
+</html>
