@@ -6,12 +6,19 @@
 %>
   <head>
   <%- include('../partials/head.ejs', { subtitle: ' - '+subtitle }); %>
+    <script
+      src="https://code.jquery.com/jquery-3.3.1.min.js"
+      integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+      crossorigin="anonymous">
+    </script>
+    <script type="text/javascript" src="/validation.js"></script>
+    <script type="text/javascript" src="/inputChecker.js"></script>
   </head>
   <body>
   <%- include('../partials/header.ejs', { user: user }); %>
     <main>
       <% if (error) { %>
-      <div class="error-message"><%= error %></div>
+      <div id="login-error" class="error-message"><%= error %></div>
       <% } %>
       <form class="auth-form flex-col" action="<%= formAction %>" method="post">
         <label for="username">USERNAME
@@ -19,7 +26,7 @@
           <span class="hint">Allowed Characters: a-zA-Z0-9._-</span>
           <% } %>
         </label>
-        <input type="text" name="username">
+        <input id="login-user" type="text" name="username">
         <label for="password">PASSWORD
           <% if (isNew) { %>
           <span class="hint">Must be at least 8 characters long</span>
@@ -27,9 +34,9 @@
           <span class="hint">Passwords are case sensative</span>
           <% } %>
         </label>
-        <input type="password" name="password">
+        <input id="login-pass" type="password" name="password">
         <div class="submit">
-          <input type="submit" value="<%= subtitle %>">
+          <input id="login-submit" type="submit" value="<%= subtitle %>">
         </div>
       </form>
       <% if (!isNew) { %>

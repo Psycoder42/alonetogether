@@ -49,7 +49,7 @@ const keyListener = (event) => {
 }
 
 // To run after page loads
-const runOnReady = () => {
+const popupsRunOnReady = () => {
   findDomRefs();
 
   // Add button listeners
@@ -66,4 +66,4 @@ const runOnReady = () => {
 }
 
 // Run when the page is done loading
-$(runOnReady);
+$(popupsRunOnReady);

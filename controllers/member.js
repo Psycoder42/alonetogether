@@ -18,13 +18,17 @@ const Post = posts.getModel(mongoose.connection);
 const Member = members.getModel(mongoose.connection);
 const Message = messages.getModel(mongoose.connection);
 
+// Get all of the available avatars
+const getAllAvatars = () => {
+  let imgDir = path.resolve(__dirname, '../public/images/avatars/');
+  return fs.readdirSync(imgDir).map(elem => '/images/avatars/'+elem);
+}
+
 // Pick a random avatar image
 const getAvatar = () => {
   try {
-    let imgDir = path.resolve(__dirname, '../public/images/avatars/');
-    let avatars = fs.readdirSync(imgDir);
-    let idx = Math.floor(Math.random()*avatars.length);
-    return '/images/avatars/'+avatars[idx];
+    let avatars = getAllAvatars();
+    return avatars[Math.floor(Math.random()*avatars.length)];
   } catch (err) {
     // Log for debugging purposes
     console.log(err.message);
@@ -98,6 +102,7 @@ router.get('/account', (req, res)=>{
   res.render('member/edit.ejs', {
     user: req.session.curUser,
     member: req.session.curUser,
+    allAvatars: getAllAvatars(),
     updateMessage: null
   });
 });
@@ -293,9 +298,11 @@ const updateSettings = async (req, res, callback) => {
     console.log(err.message);
   }
   // Return to the settings page
-  res.render(
-    'member/edit.ejs',
-    {user: req.session.curUser, member: req.session.curUser, updateMessage: message}
+  res.render('member/edit.ejs', {
+    user: req.session.curUser,
+    member: req.session.curUser, 
+    allAvatars: getAllAvatars(),
+    updateMessage: message}
   );
 }
 
@@ -321,6 +328,7 @@ router.patch('/:username', async (req, res)=>{
         res.render('member/edit.ejs', {
           user: curUser,
           member: curUser,
+          allAvatars: getAllAvatars(),
           updateMessage: 'Unknown form submission.'
         });
       }

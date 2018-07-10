@@ -5,6 +5,13 @@
 %>
   <head>
   <%- include('../partials/head.ejs', { subtitle: subtitle }); %>
+    <script
+      src="https://code.jquery.com/jquery-3.3.1.min.js"
+      integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+      crossorigin="anonymous">
+    </script>
+    <script type="text/javascript" src="/validation.js"></script>
+    <script type="text/javascript" src="/inputChecker.js"></script>
   </head>
   <body>
   <%- include('../partials/header.ejs', { user: user }); %>

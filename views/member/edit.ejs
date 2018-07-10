@@ -10,6 +10,8 @@
       integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
       crossorigin="anonymous">
     </script>
+    <script type="text/javascript" src="/validation.js"></script>
+    <script type="text/javascript" src="/inputChecker.js"></script>
     <script type="text/javascript" src="/picselect.js"></script>
   </head>
   <body>
@@ -96,11 +98,11 @@
           <div id="pass-change-error" class="error"></div>
           <div class="grid-2">
             <label for="currentPass">Current Password:</label>
-            <input type="password" name="currentPass">
+            <input id="pass-current" type="password" name="currentPass">
             <label for="newPass">New Password:</label>
-            <input type="password" name="newPass">
+            <input id="pass-set" type="password" name="newPass">
             <label for="newPassConfirm">Confim Password:</label>
-            <input type="password" name="newPassConfirm">
+            <input id="pass-confirm" type="password" name="newPassConfirm">
           </div>
           <div class="submit">
             <input id="pass-change" class="button" type="submit" value="Update Password">
@@ -123,6 +125,16 @@
       </form>
     </div>
   </main>
+  <div id="modal" class="flex-col hidden">
+    <div class="flex-col popup hidden">
+      <button type="button" class="close-popup txt-button">close</button>
+      <div id="avatar-list" class="flex-row wrap">
+      <% for (let src of allAvatars) { %>
+        <img class="avatar-option" src="<%= src %>">
+      <% } %>
+      </div>
+    </div>
+  </div>
   <% include ../partials/footer.ejs %>
   </body>
 </html>
