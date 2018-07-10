@@ -29,7 +29,7 @@
             <button id="fr-open" type="button" class="button">Friend Request</button>
             <% } %>
             <% if (!self) { %>
-            <button id="msg-open" type="button" class="button">Direct Message</button>
+            <button id="dm-open" type="button" class="button">Direct Message</button>
             <% } %>
           </div>
           <h3>Friends</h3>
@@ -91,15 +91,17 @@
         </div>
       </div>
     </main>
-    <div class="flex-col modal">
+    <div id="modal" class="flex-col hidden">
       <% if (!hideFriendInvite) { %>
-      <div class="flex-col popup friend-invite">
+      <div class="flex-col popup friend-invite hidden">
+        <button type="button" class="close-popup txt-button">close</button>
         <h3>Invite <%= member.username %> to be your friend</h3>
         <%- include('../partials/friendRequest.ejs', {user:user, member:member, inFlight: awaitingReply}); %>
       </div>
       <% } %>
       <% if (!self) { %>
-      <div class="flex-col popup direct-message">
+      <div class="flex-col popup direct-message hidden">
+        <button type="button" class="close-popup txt-button">close</button>
         <h3>Send <%= member.username %> a direct message</h3>
       <%- include('../partials/sendMessage.ejs', {user:user, member:member}); %>
       </div>

@@ -7,6 +7,7 @@
   --background-color: navy;
   --separator-color: royalblue;
   --post-color: mediumblue;
+  --popup-background-color: midnightblue;
 }
 
 html {
@@ -68,6 +69,10 @@ textarea {
 .button {
   margin: 0 5px;
   cursor: pointer;
+}
+
+.button:active {
+  outline: none;
 }
 
 .text-display, .send-message, .friend-request, .make-post {
@@ -300,23 +305,16 @@ input[type="submit"] {
   color: navy;
 }
 
-.modal {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 4;
-  text-align: center;
-  justify-content: center;
-}
-
 .popup {
-  /* display: none; */
   margin: 10%;
   padding: 2em 0;
-  background-color: midnightblue;
+  border: 1px solid var(--separator-color);
+  background-color: var(--popup-background-color);
+}
+
+.close-popup {
+  align-self: flex-end;
+  margin-right: 2em
 }
 
 .top-float {
@@ -337,4 +335,19 @@ input[type="submit"] {
   margin: 5px;
   position: relative;
   cursor: pointer;
+}
+
+#modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 4;
+  text-align: center;
+  justify-content: center;
+}
+
+.hidden {
+  display: none;
 }
