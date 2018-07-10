@@ -230,9 +230,9 @@ input[type="submit"] {
   box-shadow: 2px 2px 10px var(--separator-color);
 }
 
-.actions a {
-  float: left;
-  font-weight: normal;
+.actions {
+  display: flex;
+  justify-content: space-between;
 }
 
 .timestamp {

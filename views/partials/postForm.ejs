@@ -1,11 +1,31 @@
-<form class="flex-col fill make-post" action="/posts" method="post">
-  <textarea name="content" placeholder="Write whatever you want..."></textarea>
+<%_
+  let editing = (post != null);
+  let formAction = (editing ? '/posts/'+post._id : '/posts');
+  let content = (editing ? post.content : '');
+  let allSelect = (editing ? (post.visibility=='all' ? 'selected' : '') : 'selected');
+  let friendsSelect = (editing ? (post.visibility=='friends' ? 'selected' : '') : '');
+  let selfSelect = (editing ? (post.visibility=='self' ? 'selected' : '') : '');
+  let submitText = (editing ? 'Update' : 'Post');
+-%>
+<%_ if (editing) { -%>
+<a id="Editing"></a>
+<%_ } -%>
+<form class="flex-col fill make-post" action="<%= formAction %>" method="post">
+  <%_ if (editing) { -%>
+  <input type="hidden" name="_method" value="put">
+  <%_ } -%>
+  <textarea name="content" placeholder="Write whatever you want..."><%= content %></textarea>
   <div class="submit">
     <select name="scope">
-      <option value="all" selected>Everyone</option>
-      <option value="friends">Friends Only</option>
-      <option value="self">Myself</option>
+      <option value="all" <%= allSelect %>>Everyone</option>
+      <option value="friends" <%= friendsSelect %>>Friends Only</option>
+      <option value="self" <%= selfSelect %>>Myself</option>
     </select>
-    <input type="submit" value="Post">
+    <input type="submit" value="<%= submitText %>">
+    <%_ if (editing) { -%>
+    <a href="/refresh">
+      <button type="button" class="button">Cancel</button>
+    </a>
+    <%_ } -%>
   </div>
 </form>

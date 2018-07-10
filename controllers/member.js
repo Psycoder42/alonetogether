@@ -315,40 +315,68 @@ router.delete('/:username', async (req, res)=>{
   }
 });
 
+// Logic for rendering the user show page
+const renderUserPage = async (req, res, name, post=null) => {
+  // Don't use try/catch - let the errors bubble up
+  let curUser = req.session.curUser;
+  let foundUser = await Member.findOne({internalName: name.toLowerCase()});
+  if (!foundUser) {
+    // Was a bogus user name, redirect back to the member index
+    res.redirect(req.baseUrl);
+  } else {
+    // Check to see if the member has sent the user a friend request
+    let criteria = {sender: foundUser.username, recipient: curUser.username, isFriendInvite: true};
+    let friendRequest = await Message.findOne(criteria);
+    let frExists = (friendRequest ? true : false);
+    // Get the posts this user can see
+    let opts = {sort: {createdAt: -1}};
+    let foundPosts = await Post.find(posts.getPostQuery(foundUser, curUser), {}, opts);
+    // Switch which page is shown based on user settings/relation
+    let fullySee = curUser.isAdmin || canSee(foundUser, curUser);
+    res.render(
+      (fullySee ? 'member/show.ejs' : 'member/noshow.ejs'),
+      {
+        user: curUser,
+        member: foundUser,
+        visiblePosts: foundPosts,
+        postToEdit: post,
+        awaitingReply: frExists,
+        splitMessage: splitMessage
+      }
+    );
+  }
+}
+
 // Specific member page (Show route)
 router.get('/:username', async (req, res)=>{
   try {
-    let curUser = req.session.curUser;
-    let name = pageUtils.cleanString(req.params.username).toLowerCase();
-    let foundUser = await Member.findOne({internalName: name});
-    if (!foundUser) {
-      // Was a bogus user name, redirect back to the member index
-      res.redirect(req.baseUrl);
+    let name = pageUtils.cleanString(req.params.username);
+    renderUserPage(req, res, name);
+  } catch (err) {
+    // Log for debugging purposes
+    console.log(err.message);
+    // Send them back
+    res.redirect('back');
+  }
+});
+
+// Edit a post (Edit route)
+router.post('/:username', async (req, res)=>{
+  try {
+    let name = pageUtils.cleanString(req.params.username);
+    let postId = pageUtils.cleanString(req.body.post);
+    let foundPost = await Post.findById(postId);
+    if (!foundPost) {
+      // bogus post id, send them back
+      res.redirect('back');
     } else {
-      // Check to see if the member has sent the user a friend request
-      let criteria = {sender: foundUser.username, recipient: curUser.username, isFriendInvite: true};
-      let friendRequest = await Message.findOne(criteria);
-      let frExists = (friendRequest ? true : false);
-      // Get the posts this user can see
-      let opts = {sort: {createdAt: -1}};
-      let foundPosts = await Post.find(posts.getPostQuery(foundUser, curUser), {}, opts);
-      // Switch which page is shown based on user settings/relation
-      let fullySee = curUser.isAdmin || canSee(foundUser, curUser);
-      res.render(
-        (fullySee ? 'member/show.ejs' : 'member/noshow.ejs'),
-        {
-          user: curUser,
-          member: foundUser,
-          visiblePosts: foundPosts,
-          awaitingReply: frExists,
-          splitMessage: splitMessage
-        }
-      );
+      renderUserPage(req, res, name, foundPost);
     }
   } catch (err) {
     // Log for debugging purposes
     console.log(err.message);
-    res.redirect(req.baseUrl);
+    // Send them back
+    res.redirect('back');
   }
 });
 

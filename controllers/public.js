@@ -16,5 +16,10 @@ router.get('/about', (req, res)=>{
   });
 });
 
+// A call that just sends you back (page refresh)
+router.get('/refresh', (req, res)=>{
+  res.redirect('back');
+});
+
 // Export the router for use as middleware
 module.exports = router;

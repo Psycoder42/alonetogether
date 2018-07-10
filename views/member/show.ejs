@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <%
-  let self = (user._id == member._id);
+  let self = (user._id.toString() == member._id.toString());
   let subtitle = ' - Member - ' + member.username;
   let imgSrc = (member.username ? member.username : '/images/anon.svg');
   let blacklisted = (user.blacklist.indexOf(member.username) != -1);
@@ -51,17 +51,23 @@
         </fieldset>
         <% } %>
         <% if (self) { %>
-        <% include ../partials/postForm.ejs %>
+        <%- include('../partials/postForm.ejs', {post: null}); %>
         <% } %>
         <% if (visiblePosts.length == 0) { %>
           <h2 class="info-text">No posts to display</h2>
         <% } %>
         <% for (let post of visiblePosts) { %>
+        <% if (postToEdit && (postToEdit._id.toString() == post._id.toString())) { %>
+        <%- include('../partials/postForm.ejs', {post: postToEdit}); %>
+        <% } else { %>
           <div class="flex-row full stretch">
             <div class="flex-col full fill user-post">
               <% if (self) { %>
               <h6 class="actions">
-                <a class="txt-link" href="/posts/<%= post._id %>">Edit</a>
+                <form action="/members/<%= member.username %>" method="post">
+                  <input type="hidden" name="post" value="<%= post._id %>">
+                  <input class="txt-button" type="submit" value="Edit">
+                </form>
                 <form action="/posts/<%= post._id %>" method="post">
                   <input type="hidden" name="_method" value="delete">
                   <input class="txt-button" type="submit" value="Delete">
@@ -81,7 +87,7 @@
               <h6 class="timestamp">Posted: <%= post.createdAt+edited %></h6>
             </div>
           </div>
-        <% } %>
+        <% } } %>
         </div>
       </div>
     </main>

@@ -20,7 +20,7 @@ module.exports.getModel = (conn) => {
 module.exports.getPostQuery = (member, curUser) => {
   // Start wil finding all posts (good for self)
   let query = {author: member.username};
-  if (member._id != curUser._id) {
+  if (member._id.toString() != curUser._id.toString()) {
     // Not self so we need to limit some more
     if (member.friends.indexOf(curUser.username) == -1) {
       // Not friends only return the public posts
