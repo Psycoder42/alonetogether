@@ -9,7 +9,7 @@
   <body>
   <%- include('../partials/header.ejs', { user: user }); %>
   <main>
-    <div class="flex-row full wrap">
+    <div class="flex-row full wrap index-content">
     <% for (let member of allMembers) { %>
       <a class="txt-link" href="/members/<%= member.username %>">
       <%

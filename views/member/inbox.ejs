@@ -13,7 +13,7 @@
   <body>
   <%- include('../partials/header.ejs', { user: user }); %>
     <main class="stretch">
-      <div class="flex-col full">
+      <div class="flex-col full inbox-content">
         <h3 class="center">Compose a Message</h3>
         <%- include('../partials/sendMessage.ejs', {user: user, member: null}); %>
         <h3 class="center">Received Messages</h3>
