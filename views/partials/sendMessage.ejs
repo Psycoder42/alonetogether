@@ -3,6 +3,7 @@
   let textType = (member ? 'hidden' : 'text');
 %>
 <form class="flex-col fill send-message" action="/messages" method="post">
+  <div id="dm-error" class="error-message"></div>
   <input id="dm-recipient" type="<%= textType %>" name="recipient" placeholder="Recipient" value="<%= recipient %>">
   <textarea id="dm-message" name="message" placeholder="Write your message here..."></textarea>
   <div class="submit">

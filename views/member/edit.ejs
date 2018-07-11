@@ -54,6 +54,7 @@
         <input type="hidden" name="toUpdate" value="friends">
         <fieldset>
           <legend>Manage Friends</legend>
+          <div id="friends-error" class="error-message"></div>
           <div id="all-friends" class="checkbox-list">
             <%_ for (let i=0; i<user.friends.length; i++) { -%>
             <div>
@@ -75,6 +76,7 @@
         <input type="hidden" name="toUpdate" value="blacklist">
         <fieldset>
           <legend>Manage Blacklist</legend>
+          <div id="blacklist-error" class="error-message"></div>
           <div id="all-blacklist" class="checkbox-list">
             <%_ for (let i=0; i<user.blacklist.length; i++) { -%>
             <div>
@@ -95,7 +97,7 @@
         <input type="hidden" name="toUpdate" value="password">
         <fieldset>
           <legend>Update Password</legend>
-          <div id="pass-change-error" class="error"></div>
+          <div id="pass-change-error" class="error-message"></div>
           <div class="grid-2">
             <label for="currentPass">Current Password:</label>
             <input id="pass-current" type="password" name="currentPass">

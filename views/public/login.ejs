@@ -17,9 +17,8 @@
   <body>
   <%- include('../partials/header.ejs', { user: user }); %>
     <main>
-      <% if (error) { %>
-      <div id="login-error" class="error-message"><%= error %></div>
-      <% } %>
+      <% let txtError = (error ? error : ''); %>
+      <div id="login-error" class="error-message"><%= txtError %></div>
       <form class="auth-form flex-col" action="<%= formAction %>" method="post">
         <label for="username">USERNAME
           <% if (isNew) { %>

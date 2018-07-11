@@ -11,9 +11,10 @@
 <% } else { %>
 <div class="flex-col fill friend-request">
   <form class="flex-col fill" action="/members/<%= member.username %>/befriend" method="post">
+    <div id="fr-error" class="error-message"></div>
     <textarea id="fr-message" name="message">Hello, would you like to be friends?</textarea>
     <div class="submit">
-      <input id-"fr-submit" type="submit" value="Send Friend Request">
+      <input id="fr-submit" type="submit" value="Send Friend Request">
     </div>
   </form>
 </div>
