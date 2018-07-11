@@ -41,9 +41,9 @@ const closePopups = () => {
 
 // Open a popup
 const openPopup = (event) => {
-  let toShow = event.data.popup;
-  if (toShow) {
-    toShow.removeClass('hidden');
+  let $toShow = event.data.popup;
+  if ($toShow) {
+    $toShow.removeClass('hidden');
     domData.$modal.removeClass('hidden');
   }
 }

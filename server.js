@@ -2,6 +2,7 @@
 // Common modules: ejs express mongoose method-override
 const ejs = require('ejs');
 const express = require('express');
+const favicon = require('serve-favicon');
 const session = require('express-session');
 const methodOverride = require('method-override');
 const MemoryStore = require('memorystore')(session);
@@ -15,6 +16,7 @@ const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(express.static('./public'));
+app.use(favicon('./public/favicon.ico'));
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 app.use((req, res, next) => {

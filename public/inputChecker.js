@@ -59,7 +59,19 @@ const validateLogin = () => {
 
 // Validate user/blacklist cleanup form
 const validateSomeChecked = (event) => {
-
+  let $button = $(event.currentTarget);
+  let $checkboxParent = event.data.boxes;
+  let $errDiv = event.data.errDiv;
+  let atLeastOne = false;
+  $checkboxParent.find($('input[type="checkbox"]')).each(function() {
+    if ($(this).prop('checked')) atLeastOne = true;
+  });
+  if (!atLeastOne) {
+    $errDiv.text("Must select at least one member");
+    return false;
+  }
+  // Passed all the client side checks
+  return true;
 }
 
 // Validate password change form
@@ -132,10 +144,18 @@ const inputCheckRunOnReady = () => {
     domObj.$loginSubmit.on('click', validateLogin);
   }
   if (domObj.$friendsSubmit) {
-    domObj.$friendsSubmit.on('click', {boxes: domObj.$allFriends}, validateSomeChecked);
+    domObj.$friendsSubmit.on(
+      'click',
+      {boxes: domObj.$allFriends, errDiv: domObj.$friendsError},
+      validateSomeChecked
+    );
   }
   if (domObj.$blacklistSubmit) {
-    domObj.$blacklistSubmit.on('click', {boxes: domObj.$allBlacklist}, validateSomeChecked);
+    domObj.$blacklistSubmit.on(
+      'click',
+      {boxes: domObj.$allBlacklist, errDiv: domObj.$blacklistError},
+     validateSomeChecked
+   );
   }
   if (domObj.$passSubmit) {
     domObj.$passSubmit.on('click', validatePassChange);
