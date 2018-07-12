@@ -56,7 +56,7 @@
           <legend>Manage Friends</legend>
           <div id="friends-error" class="error-message"></div>
           <div id="all-friends" class="checkbox-list">
-            <%_ for (let i=0; i<user.friends.length; i++) { -%>
+            <%_ for (let i=0; i<sort(user.friends).length; i++) { -%>
             <div>
               <%_ let friend = user.friends[i]; -%>
               <input type="checkbox" name="friend_<%= i %>" value="<%= friend %>">
@@ -78,7 +78,7 @@
           <legend>Manage Blacklist</legend>
           <div id="blacklist-error" class="error-message"></div>
           <div id="all-blacklist" class="checkbox-list">
-            <%_ for (let i=0; i<user.blacklist.length; i++) { -%>
+            <%_ for (let i=0; i<sort(user.blacklist).length; i++) { -%>
             <div>
               <%_ let blacklisted = user.blacklist[i]; -%>
               <input type="checkbox" name="blocked_<%= i %>" value="<%= blacklisted %>">

@@ -91,7 +91,7 @@ router.get('/', (req, res)=>{
     }
     res.render('member/index.ejs', {
       user: req.session.curUser,
-      allMembers: allMembers,
+      allMembers: pageUtils.sortMembers(allMembers),
       canSee: canSee
     });
   })
@@ -103,6 +103,7 @@ router.get('/account', (req, res)=>{
     user: req.session.curUser,
     member: req.session.curUser,
     allAvatars: getAllAvatars(),
+    sort: pageUtils.sort,
     updateMessage: null
   });
 });
@@ -300,7 +301,7 @@ const updateSettings = async (req, res, callback) => {
   // Return to the settings page
   res.render('member/edit.ejs', {
     user: req.session.curUser,
-    member: req.session.curUser, 
+    member: req.session.curUser,
     allAvatars: getAllAvatars(),
     updateMessage: message}
   );
@@ -396,6 +397,7 @@ const renderUserPage = async (req, res, name, post=null) => {
         visiblePosts: foundPosts,
         postToEdit: post,
         awaitingReply: frExists,
+        sort: pageUtils.sort,
         splitMessage: splitMessage
       }
     );

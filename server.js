@@ -61,7 +61,7 @@ app.use('/', publicRoutes);
 
 // All others end up with the 404 page
 app.get('*', (req, res)=>{
-  res.status(404).send("Here Be Dragons");
+  res.render('public/404.ejs', { user: req.session.curUser});
 });
 
 // Use a global DB connection

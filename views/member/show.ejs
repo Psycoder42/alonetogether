@@ -36,7 +36,7 @@
           </div>
           <h3>Friends</h3>
           <div class="friends">
-          <% for (let f of member.friends) { %>
+          <% for (let f of sort(member.friends)) { %>
             <a class="txt-link" href="/members/<%= f %>"><%= f %></a>
           <% } %>
           </div>

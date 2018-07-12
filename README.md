@@ -15,8 +15,7 @@ The longer I coded, the more I realized all of the parts of web pages that most 
 
 ### Known Issues
 * The layout on some of the pages is awkward with poorly balanced blank space
-* The 404 page is just the words "Here Be Dragons" and dead-ends
-* The color scheme can make it hard to read text in places due to the low contrast
+* The color scheme could use a little more variety
 
 ### Potential Future Additions
 * Fully implement the Admin/Moderation functionality

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+  <%- include('../partials/head.ejs', { subtitle: 'About' }); %>
+  </head>
+  <body>
+  <%- include('../partials/header.ejs', { user: user }); %>
+    <main>
+      <div class="fill-most center">
+        <div id="not-found-content">
+          <h2>Oops! That didn't go where you wanted...</h2>
+          <p>
+            Unless you wanted to see the 404 page in which case, here it is!
+          </p>
+      </div>
+    </main>
+  <% include ../partials/footer.ejs %>
+  </body>
+</html>

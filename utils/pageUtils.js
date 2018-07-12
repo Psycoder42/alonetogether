@@ -75,3 +75,17 @@ module.exports.parseArray = (str, fallback=null) => {
   }
   return array;
 }
+
+// Perform a case-insensative sort
+module.exports.sort = (array) => {
+  return array.sort((a, b)=>{
+    return a.toLowerCase().localeCompare(b.toLowerCase());
+  });
+}
+
+// Perform a case-insensative sort of member names
+module.exports.sortMembers = (array) => {
+  return array.sort((a, b)=>{
+    return a.internalName.localeCompare(b.internalName);
+  });
+}
